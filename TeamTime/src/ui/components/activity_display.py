@@ -1,9 +1,13 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QFrame
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QFrame, QPushButton
+from PyQt5.QtCore import Qt, pyqtSignal
 
 class ActivityDisplay(QWidget):
+    category_changed = pyqtSignal(str, str, str)  # app_name, window_title, new_category
+
     def __init__(self):
         super().__init__()
+        self.current_app = None
+        self.current_window = None
         self.init_ui()
 
     def init_ui(self):
@@ -59,6 +63,67 @@ class ActivityDisplay(QWidget):
         frame_layout.addWidget(self.window_label)
         frame_layout.addWidget(self.category_label)
 
+        # Add recategorize buttons
+        button_layout = QHBoxLayout()
+        button_layout.setSpacing(8)
+
+        self.productive_btn = QPushButton("✅ Productive")
+        self.productive_btn.clicked.connect(lambda: self.recategorize("productive"))
+        self.productive_btn.setStyleSheet("""
+            QPushButton {
+                padding: 8px 16px;
+                font-size: 13px;
+                font-weight: 600;
+                background-color: #a8e6cf;
+                color: #2d5f47;
+                border: none;
+                border-radius: 10px;
+            }
+            QPushButton:hover {
+                background-color: #91d9b8;
+            }
+        """)
+
+        self.neutral_btn = QPushButton("➖ Neutral")
+        self.neutral_btn.clicked.connect(lambda: self.recategorize("neutral"))
+        self.neutral_btn.setStyleSheet("""
+            QPushButton {
+                padding: 8px 16px;
+                font-size: 13px;
+                font-weight: 600;
+                background-color: #d4d4d4;
+                color: #4a5568;
+                border: none;
+                border-radius: 10px;
+            }
+            QPushButton:hover {
+                background-color: #c0c0c0;
+            }
+        """)
+
+        self.distracting_btn = QPushButton("❌ Distracting")
+        self.distracting_btn.clicked.connect(lambda: self.recategorize("distracting"))
+        self.distracting_btn.setStyleSheet("""
+            QPushButton {
+                padding: 8px 16px;
+                font-size: 13px;
+                font-weight: 600;
+                background-color: #ffb3ba;
+                color: #8b2e2e;
+                border: none;
+                border-radius: 10px;
+            }
+            QPushButton:hover {
+                background-color: #ff9ba3;
+            }
+        """)
+
+        button_layout.addWidget(self.productive_btn)
+        button_layout.addWidget(self.neutral_btn)
+        button_layout.addWidget(self.distracting_btn)
+
+        frame_layout.addLayout(button_layout)
+
         self.frame.setLayout(frame_layout)
 
         layout.addWidget(self.title_label)
@@ -66,7 +131,13 @@ class ActivityDisplay(QWidget):
 
         self.setLayout(layout)
 
+    def recategorize(self, new_category):
+        if self.current_app and self.current_window:
+            self.category_changed.emit(self.current_app, self.current_window, new_category)
+
     def update_activity(self, app_name, window_title, category):
+        self.current_app = app_name
+        self.current_window = window_title
         self.app_label.setText(f"App: {app_name}")
         self.window_label.setText(f"Window: {window_title[:100]}...")
 

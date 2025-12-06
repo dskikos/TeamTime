@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QPushButton,
 from PyQt5.QtCore import QTimer
 from ui.components import ProgressBarWidget, ActivityDisplay, StatsPanel, XPDisplay, BlockDisplay
 from ui.history_window import HistoryWindow
+from ui.custom_categories_window import CustomCategoriesWindow
 from monitor import ActivityTracker
 from core import GoalManager, ProgressCalculator, Config, XPSystem, BlockSystem
 
@@ -55,6 +56,7 @@ class Dashboard(QMainWindow):
         layout.addWidget(self.progress_widget)
 
         self.activity_display = ActivityDisplay()
+        self.activity_display.category_changed.connect(self.on_category_changed)
         layout.addWidget(self.activity_display)
 
         self.stats_panel = StatsPanel()
@@ -127,9 +129,30 @@ class Dashboard(QMainWindow):
             }
         """)
 
+        self.categories_button = QPushButton("📝 My Categories")
+        self.categories_button.clicked.connect(self.show_custom_categories)
+        self.categories_button.setStyleSheet("""
+            QPushButton {
+                padding: 14px 28px;
+                font-size: 16px;
+                font-weight: 600;
+                background-color: #fffacd;
+                color: #6b5b00;
+                border: none;
+                border-radius: 15px;
+            }
+            QPushButton:hover {
+                background-color: #fff8b3;
+            }
+            QPushButton:pressed {
+                background-color: #fff69a;
+            }
+        """)
+
         button_layout.addWidget(self.track_button)
         button_layout.addWidget(self.history_button)
         button_layout.addWidget(self.goal_button)
+        button_layout.addWidget(self.categories_button)
 
         layout.addLayout(button_layout)
 
@@ -194,6 +217,20 @@ class Dashboard(QMainWindow):
 
         history_window = HistoryWindow(activities, self)
         history_window.exec_()
+
+    def show_custom_categories(self):
+        categories_window = CustomCategoriesWindow(self.activity_tracker.categorizer, self)
+        categories_window.exec_()
+
+    def on_category_changed(self, app_name, window_title, new_category):
+        # Add the app name to the appropriate category in categories.json
+        # Use the actual app_name, not lowercase, so it displays properly in My Categories
+        self.activity_tracker.categorizer.add_rule(new_category, app_name)
+        QMessageBox.information(
+            self,
+            "Category Learned!",
+            f"'{app_name}' will now be categorized as '{new_category}' in the future!"
+        )
 
     def set_goal(self, show_message=True):
         current_goal = self.goal_manager.get_daily_goal()
