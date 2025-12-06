@@ -35,7 +35,16 @@ class Categorizer:
         app_lower = app_name.lower() if app_name else ""
         title_lower = window_title.lower() if window_title else ""
 
-        # Check if it's a browser first
+        # FIRST: Check if this app was manually categorized - these have highest priority!
+        manually_changed = self.categories.get("manually_changed", [])
+        for manual_app in manually_changed:
+            if manual_app.lower() == app_lower:
+                # Find which category this manually changed app is in
+                for category in ['productive', 'distracting', 'neutral']:
+                    if manual_app in self.categories.get(category, []):
+                        return category
+
+        # Check if it's a browser
         is_browser = False
         for browser in self.categories.get("distracting_browsers", []):
             if browser.lower() in app_lower:
@@ -45,37 +54,92 @@ class Categorizer:
         # If it's a browser, analyze the active tab (window title)
         if is_browser:
             # Extract domain/site from window title
-            # Browser titles are usually: "Page Title - Site Name" or "Site: Page Title"
+            # Browser titles are usually: "Page Title - Site Name" or "Tab Title | Domain - Browser"
+            # Examples:
+            # "ChatGPT - Mozilla Firefox" -> need to check for "chatgpt" keyword
+            # "Instagram - Brave" -> "instagram" is clear
+            # "Pull Requests · user/repo - Mozilla Firefox" -> check for github patterns
 
-            # Check for productive sites in the window title (active tab)
-            productive_sites = ['stackoverflow', 'github', 'gitlab', 'docs',
-                                'documentation', 'tutorial', 'learn',
-                                'developer', 'api', 'programming', 'code',
-                                'leetcode', 'geeksforgeeks', 'mdn', 'w3schools',
-                                'coursera', 'udemy', 'edx', 'khan academy']
+            # Check for productive sites/apps in window title
+            productive_sites = [
+                'stackoverflow', 'github', 'gitlab', 'bitbucket',
+                'docs', 'documentation', 'tutorial', 'learn',
+                'developer', 'api', 'programming', 'code',
+                'leetcode', 'hackerrank', 'codewars', 'geeksforgeeks',
+                'mdn', 'w3schools', 'freecodecamp',
+                'coursera', 'udemy', 'edx', 'khan academy', 'pluralsight',
+                'chatgpt', 'claude', 'gemini', 'copilot',  # AI assistants for coding
+                'jupyter', 'colab', 'kaggle', 'huggingface',
+                'arxiv', 'scholar', 'researchgate', 'pubmed',  # Research
+                'overleaf', 'latex',
+                'jira', 'confluence', 'linear'  # Project management
+            ]
+
+            # Check for productive keywords/patterns
+            productive_patterns = [
+                'pull request', 'merge request', 'commit', 'issue',  # Git terms
+                'documentation', 'api reference', 'tutorial',
+                'stackoverflow.com', 'github.com', 'gitlab.com'
+            ]
+
             for site in productive_sites:
                 if site in title_lower:
                     return "productive"
 
+            for pattern in productive_patterns:
+                if pattern in title_lower:
+                    return "productive"
+
             # Check for distracting sites in the window title (active tab)
-            distracting_sites = ['instagram', 'facebook', 'twitter', 'tiktok',
-                                 'reddit', 'youtube', 'twitch', 'netflix',
-                                 'hulu', 'primevideo', 'disney', 'snapchat',
-                                 'whatsapp', 'messenger', 'telegram']
+            distracting_sites = [
+                'instagram', 'facebook', 'twitter', 'x.com', 'tiktok',
+                'reddit', 'youtube', 'twitch', 'netflix',
+                'hulu', 'primevideo', 'disney', 'snapchat',
+                'whatsapp', 'messenger', 'telegram',
+                'pinterest', 'tumblr', '9gag', 'imgur',
+                'spotify web', 'soundcloud',  # Music streaming in browser
+                'amazon', 'ebay', 'shopping'  # Shopping sites
+            ]
+
+            # Distracting patterns
+            distracting_patterns = [
+                'watch', 'stream', 'gaming', 'meme',
+                'feed', 'trending', 'for you'
+            ]
+
             for site in distracting_sites:
                 if site in title_lower:
                     return "distracting"
 
+            for pattern in distracting_patterns:
+                if pattern in title_lower:
+                    return "distracting"
+
             # Check for neutral sites
-            neutral_sites = ['gmail', 'outlook', 'mail', 'calendar', 'drive',
-                            'dropbox', 'onedrive', 'zoom', 'teams', 'slack',
-                            'discord', 'notion', 'trello', 'asana']
+            neutral_sites = [
+                'gmail', 'outlook', 'mail', 'protonmail',
+                'calendar', 'drive', 'dropbox', 'onedrive',
+                'zoom', 'teams', 'slack', 'discord',
+                'notion', 'trello', 'asana', 'monday',
+                'wikipedia', 'news'
+            ]
+
             for site in neutral_sites:
                 if site in title_lower:
                     return "neutral"
 
-            # If no specific site detected, default to distracting for browsers
-            return "distracting"
+            # Check browser name at the end to determine default
+            # If the window title ends with browser name and nothing else useful detected,
+            # it's probably a new tab or homepage -> neutral
+            browser_names = ['firefox', 'chrome', 'safari', 'edge', 'brave', 'opera']
+            for browser in browser_names:
+                # If title is basically just "New Tab - Firefox" or similar
+                if title_lower.startswith('new tab') or title_lower.startswith('start page'):
+                    return "neutral"
+
+            # If no specific site detected, default to neutral for browsers
+            # (changed from distracting to be less aggressive)
+            return "neutral"
 
         # Check productive apps/keywords
         for keyword in self.categories.get("productive", []):

@@ -27,8 +27,7 @@
     "libreoffice",
     "latex",
     "overleaf",
-    "code",
-    "firefox"
+    "code"
   ],
   "distracting": [
     "instagram",
@@ -78,7 +77,5 @@
     "edge",
     "brave"
   ],
-  "manually_changed": [
-    "firefox"
-  ]
+  "manually_changed": []
 }
