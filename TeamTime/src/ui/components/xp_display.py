@@ -1,5 +1,7 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QProgressBar, QPushButton, QFrame
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
+                             QLabel, QProgressBar)
 from PyQt5.QtCore import Qt
+
 
 class XPDisplay(QWidget):
     def __init__(self):
@@ -38,7 +40,7 @@ class XPDisplay(QWidget):
         # XP Progress Bar
         self.xp_bar = QProgressBar()
         self.xp_bar.setMinimum(0)
-        self.xp_bar.setMaximum(1000)
+        self.xp_bar.setMaximum(500)
         self.xp_bar.setValue(0)
         self.xp_bar.setTextVisible(True)
         self.xp_bar.setFormat("%v / %m XP")
@@ -80,7 +82,7 @@ class XPDisplay(QWidget):
         self.xp_label.setText(f"{current_xp} XP")
 
         # Update progress bar
-        self.xp_bar.setMaximum(1000)
-        xp_in_current_level = current_xp % 1000
+        self.xp_bar.setMaximum(500)
+        xp_in_current_level = current_xp % 500
         self.xp_bar.setValue(xp_in_current_level)
-        self.xp_bar.setFormat(f"{xp_in_current_level} / 1000 XP")
+        self.xp_bar.setFormat(f"{xp_in_current_level} / 500 XP")
