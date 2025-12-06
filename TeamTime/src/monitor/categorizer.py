@@ -1,19 +1,15 @@
 import json
 import os
 from pathlib import Path
-from anthropic import Anthropic
 
 class Categorizer:
-    def __init__(self, config_path=None, use_llm=False):
+    def __init__(self, config_path=None):
         if config_path is None:
             # Get the correct path relative to the project root
             base_dir = Path(__file__).resolve().parent.parent.parent
             config_path = base_dir / 'config' / 'categories.json'
         self.config_path = str(config_path)
         self.categories = self.load_categories()
-        self.use_llm = use_llm
-        self.client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY")) if use_llm else None
-        self.cache = {}
 
     def load_categories(self):
         if os.path.exists(self.config_path):
@@ -156,34 +152,7 @@ class Categorizer:
             if keyword.lower() in app_lower or keyword.lower() in title_lower:
                 return "neutral"
 
-        # Use LLM as fallback
-        if self.use_llm and self.client:
-            return self._categorize_with_llm(app_name, window_title)
-
-        return "neutral"
-
-    def _categorize_with_llm(self, app_name, window_title):
-        cache_key = f"{app_name}:{window_title[:50]}"
-        if cache_key in self.cache:
-            return self.cache[cache_key]
-
-        try:
-            message = self.client.messages.create(
-                model="claude-3-haiku-20240307",
-                max_tokens=50,
-                messages=[{
-                    "role": "user",
-                    "content": f"Categorize this activity as 'productive', 'distracting', or 'neutral':\nApp: {app_name}\nWindow: {window_title}\n\nRespond with ONLY one word: productive, distracting, or neutral."
-                }]
-            )
-
-            category = message.content[0].text.strip().lower()
-            if category in ['productive', 'distracting', 'neutral']:
-                self.cache[cache_key] = category
-                return category
-        except Exception as e:
-            print(f"LLM categorization error: {e}")
-
+        # Default to neutral for unknown applications
         return "neutral"
 
     def add_rule(self, category, keyword):
@@ -220,4 +189,3 @@ class Categorizer:
 
     def reload_categories(self):
         self.categories = self.load_categories()
-        self.cache.clear()  # Clear cache to force recategorization
