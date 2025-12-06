@@ -1,92 +1,124 @@
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QTextEdit, QPushButton, QLabel, QHBoxLayout
+from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QPushButton, QLabel,
+                             QHBoxLayout, QScrollArea, QWidget, QFrame)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 from io import BytesIO
+from datetime import datetime, timedelta
+from collections import defaultdict
+
 
 class HistoryWindow(QDialog):
     def __init__(self, activities, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Activity History")
-        self.setGeometry(200, 200, 900, 600)
-        self.setStyleSheet("background-color: #1a1a1a; color: #ffffff;")
+        self.activities = activities
+        self.setWindowTitle("📊 Activity History")
+        self.setGeometry(100, 100, 1400, 800)
+        self.setStyleSheet("background-color: #f8f9fa;")
 
-        layout = QHBoxLayout()
+        self.init_ui()
 
-        # Left side - pie chart
-        chart_layout = QVBoxLayout()
-        self.chart_label = QLabel()
-        self.create_pie_chart(activities)
-        chart_layout.addWidget(self.chart_label)
-        chart_layout.addStretch()
+    def init_ui(self):
+        main_layout = QVBoxLayout()
+        main_layout.setSpacing(20)
+        main_layout.setContentsMargins(30, 30, 30, 30)
 
-        # Right side - activity table
-        right_layout = QVBoxLayout()
-
-        self.text_display = QTextEdit()
-        self.text_display.setReadOnly(True)
-        self.text_display.setStyleSheet("""
-            QTextEdit {
-                background-color: #0d0d0d;
-                color: #ffffff;
-                border: 2px solid #333333;
-                border-radius: 5px;
-                padding: 10px;
-                font-family: 'Courier New';
-                font-size: 12px;
-            }
+        # Title
+        title = QLabel("Activity History")
+        title.setStyleSheet("""
+            font-size: 28px;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 10px;
         """)
+        title.setAlignment(Qt.AlignCenter)
+        main_layout.addWidget(title)
 
-        history_html = "<table width='100%' style='border-collapse: collapse;'>"
-        history_html += "<tr style='background-color: #2a2a2a; font-weight: bold;'>"
-        history_html += "<td style='padding: 10px; border: 1px solid #333;'>Time</td>"
-        history_html += "<td style='padding: 10px; border: 1px solid #333;'>App</td>"
-        history_html += "<td style='padding: 10px; border: 1px solid #333;'>Category</td>"
-        history_html += "</tr>"
+        # Charts section
+        charts_layout = QHBoxLayout()
+        charts_layout.setSpacing(20)
 
-        for act in activities[-100:]:
-            color = "#27ae60" if act.category == "productive" else "#e74c3c" if act.category == "distracting" else "#95a5a6"
-            history_html += f"<tr style='border: 1px solid #333;'>"
-            history_html += f"<td style='padding: 8px; border: 1px solid #333;'>{act.timestamp.strftime('%H:%M:%S')}</td>"
-            history_html += f"<td style='padding: 8px; border: 1px solid #333;'>{act.app_name}</td>"
-            history_html += f"<td style='padding: 8px; border: 1px solid #333; color: {color}; font-weight: bold;'>{act.category.upper()}</td>"
-            history_html += "</tr>"
+        # Pie chart
+        pie_container = self.create_chart_container("Time Distribution")
+        self.pie_label = QLabel()
+        self.create_pie_chart()
+        pie_layout = QVBoxLayout()
+        pie_layout.addWidget(self.pie_label, alignment=Qt.AlignCenter)
+        pie_container.layout().addLayout(pie_layout)
+        charts_layout.addWidget(pie_container)
 
-        history_html += "</table>"
-        self.text_display.setHtml(history_html)
+        # Timeline chart
+        timeline_container = self.create_chart_container("Minute-by-Minute Timeline")
+        self.timeline_label = QLabel()
+        self.create_timeline_chart()
+        timeline_layout = QVBoxLayout()
+        timeline_layout.addWidget(self.timeline_label, alignment=Qt.AlignCenter)
+        timeline_container.layout().addLayout(timeline_layout)
+        charts_layout.addWidget(timeline_container)
 
-        close_button = QPushButton("Close")
+        main_layout.addLayout(charts_layout)
+
+        # Activity log section
+        log_container = self.create_chart_container("Activity Log")
+        self.create_activity_log(log_container)
+        main_layout.addWidget(log_container)
+
+        # Close button
+        close_button = QPushButton("✕ Close")
         close_button.clicked.connect(self.close)
         close_button.setStyleSheet("""
             QPushButton {
-                background-color: #333333;
+                background-color: #e53e3e;
                 color: white;
                 border: none;
-                padding: 10px;
-                border-radius: 5px;
-                font-size: 14px;
-                font-weight: bold;
+                padding: 12px 40px;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: 600;
             }
             QPushButton:hover {
-                background-color: #444444;
+                background-color: #c53030;
+            }
+        """)
+        close_button.setMaximumWidth(200)
+        main_layout.addWidget(close_button, alignment=Qt.AlignCenter)
+
+        self.setLayout(main_layout)
+
+    def create_chart_container(self, title):
+        container = QFrame()
+        container.setStyleSheet("""
+            QFrame {
+                background-color: white;
+                border-radius: 15px;
+                padding: 20px;
             }
         """)
 
-        right_layout.addWidget(self.text_display)
-        right_layout.addWidget(close_button)
+        layout = QVBoxLayout()
+        layout.setSpacing(15)
 
-        layout.addLayout(chart_layout)
-        layout.addLayout(right_layout)
-        self.setLayout(layout)
+        title_label = QLabel(title)
+        title_label.setStyleSheet("""
+            font-size: 18px;
+            font-weight: bold;
+            color: #4a5568;
+        """)
+        title_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title_label)
 
-    def create_pie_chart(self, activities):
+        container.setLayout(layout)
+        return container
+
+    def create_pie_chart(self):
         productive_mins = 0
         distracting_mins = 0
         neutral_mins = 0
 
-        for act in activities:
+        for act in self.activities:
             duration = act.duration_seconds / 60
             if act.category == "productive":
                 productive_mins += duration
@@ -103,19 +135,192 @@ class HistoryWindow(QDialog):
         labels = [f'Productive\n{productive_mins:.1f} min',
                   f'Distracting\n{distracting_mins:.1f} min',
                   f'Neutral\n{neutral_mins:.1f} min']
-        colors = ['#27ae60', '#e74c3c', '#95a5a6']
+        colors = ['#a8e6cf', '#ffb3ba', '#e0e0e0']
 
-        fig, ax = plt.subplots(figsize=(5, 5), facecolor='#1a1a1a')
-        ax.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%',
-               startangle=90, textprops={'color': 'white', 'fontsize': 11})
+        fig, ax = plt.subplots(figsize=(6, 6), facecolor='white')
+        wedges, texts, autotexts = ax.pie(sizes, labels=labels, colors=colors,
+                                            autopct='%1.1f%%', startangle=90,
+                                            textprops={'fontsize': 12, 'weight': 'bold'})
+
+        for autotext in autotexts:
+            autotext.set_color('#2d3748')
+            autotext.set_fontsize(11)
+
+        for text in texts:
+            text.set_color('#4a5568')
+            text.set_fontsize(11)
+
         ax.axis('equal')
-        plt.title('Time Distribution', color='white', fontsize=14, pad=20)
 
         buf = BytesIO()
-        plt.savefig(buf, format='png', facecolor='#1a1a1a', bbox_inches='tight')
+        plt.savefig(buf, format='png', facecolor='white', bbox_inches='tight', dpi=100)
         buf.seek(0)
         plt.close()
 
         pixmap = QPixmap()
         pixmap.loadFromData(buf.getvalue())
-        self.chart_label.setPixmap(pixmap)
+        self.pie_label.setPixmap(pixmap)
+
+    def create_timeline_chart(self):
+        if not self.activities:
+            return
+
+        # Group activities by minute
+        minute_data = defaultdict(lambda: {'productive': 0, 'distracting': 0, 'neutral': 0})
+
+        for act in self.activities:
+            # Round to nearest minute
+            timestamp = act.timestamp.replace(second=0, microsecond=0)
+            duration_mins = act.duration_seconds / 60
+
+            if act.category == "productive":
+                minute_data[timestamp]['productive'] += duration_mins
+            elif act.category == "distracting":
+                minute_data[timestamp]['distracting'] += duration_mins
+            elif act.category == "neutral":
+                minute_data[timestamp]['neutral'] += duration_mins
+
+        if not minute_data:
+            return
+
+        # Sort by time
+        sorted_times = sorted(minute_data.keys())
+
+        # Create figure
+        fig, ax = plt.subplots(figsize=(10, 4), facecolor='white')
+
+        # Prepare data for stacked bar chart
+        productive = [minute_data[t]['productive'] for t in sorted_times]
+        distracting = [minute_data[t]['distracting'] for t in sorted_times]
+        neutral = [minute_data[t]['neutral'] for t in sorted_times]
+
+        # Plot stacked bars
+        bar_width = 0.8
+        ax.bar(sorted_times, productive, bar_width, label='Productive',
+               color='#a8e6cf', edgecolor='none')
+        ax.bar(sorted_times, distracting, bar_width, bottom=productive,
+               label='Distracting', color='#ffb3ba', edgecolor='none')
+
+        bottom = [p + d for p, d in zip(productive, distracting)]
+        ax.bar(sorted_times, neutral, bar_width, bottom=bottom,
+               label='Neutral', color='#e0e0e0', edgecolor='none')
+
+        # Format x-axis
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+        ax.xaxis.set_major_locator(mdates.MinuteLocator(interval=max(1, len(sorted_times) // 20)))
+        plt.xticks(rotation=45, ha='right')
+
+        # Style
+        ax.set_ylabel('Minutes', fontsize=11, color='#4a5568', fontweight='bold')
+        ax.set_xlabel('Time', fontsize=11, color='#4a5568', fontweight='bold')
+        ax.legend(loc='upper left', frameon=True, fancybox=True, shadow=True)
+        ax.grid(True, alpha=0.2, linestyle='--', linewidth=0.5)
+        ax.set_facecolor('#f8f9fa')
+
+        # Remove top and right spines
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['left'].set_color('#cbd5e0')
+        ax.spines['bottom'].set_color('#cbd5e0')
+
+        plt.tight_layout()
+
+        buf = BytesIO()
+        plt.savefig(buf, format='png', facecolor='white', bbox_inches='tight', dpi=100)
+        buf.seek(0)
+        plt.close()
+
+        pixmap = QPixmap()
+        pixmap.loadFromData(buf.getvalue())
+        self.timeline_label.setPixmap(pixmap)
+
+    def create_activity_log(self, container):
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet("""
+            QScrollArea {
+                border: none;
+                background-color: transparent;
+            }
+        """)
+
+        scroll_content = QWidget()
+        scroll_layout = QVBoxLayout()
+        scroll_layout.setSpacing(8)
+        scroll_layout.setContentsMargins(10, 10, 10, 10)
+
+        # Group activities by minute
+        activity_groups = defaultdict(list)
+        for act in self.activities:
+            minute_key = act.timestamp.replace(second=0, microsecond=0)
+            activity_groups[minute_key].append(act)
+
+        # Sort by time (most recent first)
+        sorted_times = sorted(activity_groups.keys(), reverse=True)
+
+        for time_key in sorted_times[:100]:  # Show last 100 minutes
+            acts = activity_groups[time_key]
+
+            # Create time block
+            time_block = QFrame()
+            time_block.setStyleSheet("""
+                QFrame {
+                    background-color: #f7fafc;
+                    border-left: 4px solid #cbd5e0;
+                    border-radius: 8px;
+                    padding: 10px;
+                }
+            """)
+
+            block_layout = QHBoxLayout()
+            block_layout.setSpacing(15)
+
+            # Time label
+            time_label = QLabel(time_key.strftime('%H:%M'))
+            time_label.setStyleSheet("""
+                font-size: 14px;
+                font-weight: bold;
+                color: #4a5568;
+                min-width: 60px;
+            """)
+            block_layout.addWidget(time_label)
+
+            # Activities for this minute
+            activities_layout = QVBoxLayout()
+            activities_layout.setSpacing(5)
+
+            for act in acts:
+                category_colors = {
+                    'productive': '#a8e6cf',
+                    'distracting': '#ffb3ba',
+                    'neutral': '#e0e0e0'
+                }
+                category_text_colors = {
+                    'productive': '#2d5f47',
+                    'distracting': '#8b2e2e',
+                    'neutral': '#4a5568'
+                }
+
+                color = category_colors.get(act.category, '#e0e0e0')
+                text_color = category_text_colors.get(act.category, '#4a5568')
+
+                activity_label = QLabel(f"<b>{act.app_name}</b> - {act.window_title[:60]}{'...' if len(act.window_title) > 60 else ''}")
+                activity_label.setStyleSheet(f"""
+                    background-color: {color};
+                    color: {text_color};
+                    padding: 6px 12px;
+                    border-radius: 6px;
+                    font-size: 12px;
+                """)
+                activity_label.setWordWrap(True)
+                activities_layout.addWidget(activity_label)
+
+            block_layout.addLayout(activities_layout, stretch=1)
+            time_block.setLayout(block_layout)
+            scroll_layout.addWidget(time_block)
+
+        scroll_content.setLayout(scroll_layout)
+        scroll.setWidget(scroll_content)
+        scroll.setMaximumHeight(300)
+
+        container.layout().addWidget(scroll)
