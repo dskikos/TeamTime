@@ -19,6 +19,11 @@ class Dashboard(QMainWindow):
         self.previous_productive_mins = 0
         self.previous_distracting_mins = 0
 
+        # Unproductive warning tracking
+        self.last_productive_time = None
+        self.unproductive_warning_shown = False
+        self.UNPRODUCTIVE_THRESHOLD_MINUTES = 15
+
         self.init_ui()
         self.setup_timer()
 
@@ -276,6 +281,31 @@ class Dashboard(QMainWindow):
                     current_activity['window_title'],
                     current_activity['category']
                 )
+
+                # Check for unproductive warning
+                self.check_unproductive_warning(current_activity)
+
+    def check_unproductive_warning(self, current_activity):
+        from datetime import datetime, timedelta
+
+        if current_activity['category'] == 'productive':
+            self.last_productive_time = datetime.now()
+            self.unproductive_warning_shown = False
+        elif current_activity['category'] in ['distracting', 'neutral']:
+            if self.last_productive_time is None:
+                self.last_productive_time = datetime.now()
+            else:
+                time_unproductive = (datetime.now() - self.last_productive_time).total_seconds() / 60
+
+                if time_unproductive >= self.UNPRODUCTIVE_THRESHOLD_MINUTES and not self.unproductive_warning_shown:
+                    self.unproductive_warning_shown = True
+                    QMessageBox.warning(
+                        self,
+                        "⚠️ Productivity Alert",
+                        f"You've been unproductive for {int(time_unproductive)} minutes!\n\n"
+                        f"Time to get back on track! 💪\n\n"
+                        f"Focus on your goals and stay productive."
+                    )
 
     def closeEvent(self, event):
         # Stop the update timer first
