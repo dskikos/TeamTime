@@ -39,7 +39,25 @@ class Progress(BaseModel):
     class Meta:
         table_name = 'progress'
 
+class XPRecord(BaseModel):
+    timestamp = DateTimeField(default=datetime.now)
+    xp_change = IntegerField()
+    total_xp = IntegerField()
+    reason = CharField()
+
+    class Meta:
+        table_name = 'xp_records'
+
+class BlockRecord(BaseModel):
+    timestamp = DateTimeField(default=datetime.now)
+    action = CharField()  # activate, deactivate, emergency_unlock
+    reason = CharField()
+    blocked_sites = TextField()
+
+    class Meta:
+        table_name = 'block_records'
+
 def initialize_database():
     db.connect()
-    db.create_tables([Activity, Goal, Progress])
+    db.create_tables([Activity, Goal, Progress, XPRecord, BlockRecord])
     db.close()
