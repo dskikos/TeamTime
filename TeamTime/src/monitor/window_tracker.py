@@ -1,13 +1,38 @@
 import platform
 import psutil
+import os
+import subprocess
 
 class WindowTracker:
     def __init__(self):
         self.os_type = platform.system()
+        # Detect if we're running in WSL
+        self.is_wsl = self._detect_wsl()
+        if self.is_wsl:
+            print("WSL environment detected - will monitor Windows applications")
+
+    def _detect_wsl(self):
+        """Detect if we're running in WSL"""
+        try:
+            # Check for WSL-specific indicators
+            if os.path.exists('/proc/version'):
+                with open('/proc/version', 'r') as f:
+                    version_info = f.read().lower()
+                    if 'microsoft' in version_info or 'wsl' in version_info:
+                        return True
+            # Also check if we can execute Windows commands
+            if os.path.exists('/mnt/c/Windows'):
+                return True
+        except:
+            pass
+        return False
 
     def get_active_window(self):
         try:
-            if self.os_type == "Windows":
+            # If we're in WSL, use Windows tracking
+            if self.is_wsl:
+                return self._get_wsl_windows_active_window()
+            elif self.os_type == "Windows":
                 return self._get_windows_active_window()
             elif self.os_type == "Darwin":
                 return self._get_mac_active_window()
@@ -72,9 +97,70 @@ class WindowTracker:
             print(f"Mac tracking error: {e}")
             return None, None
 
+    def _get_wsl_windows_active_window(self):
+        """Get active window from Windows while running in WSL"""
+        try:
+            # PowerShell script to get active window info
+            ps_script = """
+            Add-Type @"
+                using System;
+                using System.Runtime.InteropServices;
+                using System.Text;
+                public class WindowHelper {
+                    [DllImport("user32.dll")]
+                    public static extern IntPtr GetForegroundWindow();
+                    [DllImport("user32.dll")]
+                    public static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
+                    [DllImport("user32.dll")]
+                    public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
+                }
+"@
+            $hwnd = [WindowHelper]::GetForegroundWindow()
+            $title = New-Object System.Text.StringBuilder 256
+            [void][WindowHelper]::GetWindowText($hwnd, $title, 256)
+            $processId = 0
+            [void][WindowHelper]::GetWindowThreadProcessId($hwnd, [ref]$processId)
+            $process = Get-Process -Id $processId -ErrorAction SilentlyContinue
+            if ($process) {
+                Write-Output "$($title.ToString())|$($process.ProcessName)"
+            } else {
+                Write-Output "$($title.ToString())|unknown"
+            }
+            """
+
+            # Execute PowerShell through WSL interop
+            result = subprocess.check_output(
+                ['powershell.exe', '-NoProfile', '-NonInteractive', '-Command', ps_script],
+                stderr=subprocess.DEVNULL,
+                timeout=5
+            ).decode('utf-8', errors='ignore').strip()
+
+            if '|' in result:
+                window_title, app_name = result.split('|', 1)
+                window_title = window_title.strip()
+                app_name = app_name.strip().lower().replace('.exe', '')
+
+                # Filter out TeamTime itself (only if it's actually the TeamTime Python app)
+                if window_title and app_name:
+                    # Only filter if it's python AND has TeamTime Dashboard in the title
+                    if 'python' in app_name and 'teamtime dashboard' in window_title.lower():
+                        return None, None
+                    return window_title, app_name
+
+            return None, None
+
+        except subprocess.TimeoutExpired:
+            print("PowerShell timeout - Windows may be slow to respond")
+            return None, None
+        except FileNotFoundError:
+            print("PowerShell not found. Make sure Windows interop is enabled in WSL.")
+            return None, None
+        except Exception as e:
+            print(f"WSL Windows tracking error: {e}")
+            return None, None
+
     def _get_linux_active_window(self):
         try:
-            import subprocess
             window_id = subprocess.check_output(['xdotool', 'getactivewindow']).decode().strip()
             window_title = subprocess.check_output(['xdotool', 'getwindowname', window_id]).decode().strip()
             pid = subprocess.check_output(['xdotool', 'getwindowpid', window_id]).decode().strip()
