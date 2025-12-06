@@ -86,30 +86,41 @@ class Categorizer:
                 if pattern in title_lower:
                     return "productive"
 
-            # Check for distracting sites in the window title (active tab)
-            distracting_sites = [
-                'instagram', 'facebook', 'twitter', 'x.com', 'tiktok',
-                'reddit', 'youtube', 'twitch', 'netflix',
-                'hulu', 'primevideo', 'disney', 'snapchat',
-                'whatsapp', 'messenger', 'telegram',
-                'pinterest', 'tumblr', '9gag', 'imgur',
-                'spotify web', 'soundcloud',  # Music streaming in browser
-                'amazon', 'ebay', 'shopping'  # Shopping sites
-            ]
-
-            # Distracting patterns
-            distracting_patterns = [
-                'watch', 'stream', 'gaming', 'meme',
-                'feed', 'trending', 'for you'
-            ]
-
-            for site in distracting_sites:
+            # Special handling for YouTube and ChatGPT - need keyword-based analysis
+            # These sites can be productive OR distracting depending on content
+            needs_keyword_analysis = False
+            for site in ['youtube', 'chatgpt', 'claude.ai', 'gemini']:
                 if site in title_lower:
-                    return "distracting"
+                    needs_keyword_analysis = True
+                    break
 
-            for pattern in distracting_patterns:
-                if pattern in title_lower:
-                    return "distracting"
+            # If this is YouTube/ChatGPT/etc, skip the generic distracting checks
+            # and jump straight to keyword analysis
+            if not needs_keyword_analysis:
+                # Check for distracting sites in the window title (active tab)
+                distracting_sites = [
+                    'instagram', 'facebook', 'twitter', 'x.com', 'tiktok',
+                    'reddit', 'twitch', 'netflix',
+                    'hulu', 'primevideo', 'disney', 'snapchat',
+                    'whatsapp', 'messenger', 'telegram',
+                    'pinterest', 'tumblr', '9gag', 'imgur',
+                    'spotify web', 'soundcloud',  # Music streaming in browser
+                    'amazon', 'ebay', 'shopping'  # Shopping sites
+                ]
+
+                # Distracting patterns
+                distracting_patterns = [
+                    'watch', 'stream', 'gaming', 'meme',
+                    'feed', 'trending', 'for you'
+                ]
+
+                for site in distracting_sites:
+                    if site in title_lower:
+                        return "distracting"
+
+                for pattern in distracting_patterns:
+                    if pattern in title_lower:
+                        return "distracting"
 
             # Check for neutral sites
             neutral_sites = [
@@ -150,12 +161,13 @@ class Categorizer:
                             tab_title_lower = parts[0].strip().lower()
                     break
 
-            # Productive keywords for chat titles
+            # Productive keywords for video/chat titles
             productive_keywords = [
                 # Programming
                 'code', 'coding', 'programming', 'python', 'javascript', 'java', 'c++', 'html', 'css',
                 'debug', 'error', 'bug', 'algorithm', 'function', 'class', 'variable',
                 'git', 'github', 'commit', 'push', 'pull', 'merge', 'branch',
+                'sql', 'database', 'api', 'backend', 'frontend', 'development', 'software',
                 # Math & Science
                 'fourier', 'transform', 'integral', 'derivative', 'equation', 'matrix',
                 'linear', 'algebra', 'calculus', 'statistics', 'probability',
@@ -164,23 +176,34 @@ class Categorizer:
                 'lti', 'system', 'signal', 'filter', 'frequency', 'amplitude',
                 'circuit', 'engineering', 'optimization',
                 # Study/Learning
-                'learn', 'study', 'tutorial', 'homework', 'assignment', 'thesis',
+                'learn', 'study', 'tutorial', 'lecture', 'lesson',
+                'homework', 'assignment', 'thesis', 'exam', 'test',
                 'research', 'paper', 'article', 'university', 'course',
-                'erkl', 'explain', 'verstehen', 'understand'
+                'erkl', 'explain', 'verstehen', 'understand',
+                'how to', 'wie man', 'anleitung', 'guide',
+                # Educational content indicators
+                'educational', 'education', 'bildung', 'lernen',
+                'wissenschaft', 'science', 'akademisch', 'academic'
             ]
 
-            # Distracting keywords for chat titles
+            # Distracting keywords for video/chat titles
             distracting_keywords = [
                 # Gaming
-                'fortnite', 'minecraft', 'game', 'gaming', 'roblox', 'valorant',
+                'fortnite', 'minecraft', 'gaming', 'roblox', 'valorant',
                 'league', 'dota', 'csgo', 'overwatch', 'apex', 'warzone',
-                'strategy', 'strategien', 'tips', 'tricks', 'walkthrough',
+                'gameplay', 'let\'s play', 'playthrough',
                 # Entertainment
-                'movie', 'film', 'serie', 'series', 'netflix', 'video',
-                'music', 'song', 'album', 'concert', 'festival',
-                'meme', 'funny', 'joke', 'entertainment',
-                # Shopping
-                'buy', 'kaufen', 'shopping', 'sale', 'deal', 'price'
+                'movie', 'film', 'serie', 'series', 'trailer',
+                'music video', 'musikvideo', 'song', 'album', 'concert', 'festival',
+                'meme', 'funny', 'joke', 'comedy', 'prank', 'challenge',
+                'entertainment', 'unterhaltung',
+                'vlog', 'reaction', 'compilation',
+                # Shopping & Lifestyle
+                'buy', 'kaufen', 'shopping', 'haul', 'sale', 'deal', 'unboxing',
+                # Social/Gossip
+                'drama', 'gossip', 'scandal', 'celebrity',
+                # Time wasters
+                'top 10', 'fail', 'cringe', 'shorts', 'tiktok'
             ]
 
             # Check for productive keywords
@@ -192,6 +215,15 @@ class Categorizer:
             for keyword in distracting_keywords:
                 if keyword in tab_title_lower:
                     return "distracting"
+
+            # If no keywords matched and we're on YouTube/ChatGPT, use smart defaults
+            if needs_keyword_analysis:
+                # For YouTube: default to distracting (entertainment)
+                if 'youtube' in title_lower:
+                    return "distracting"
+                # For ChatGPT/Claude/Gemini: default to neutral (could be work or not)
+                if any(site in title_lower for site in ['chatgpt', 'claude', 'gemini']):
+                    return "neutral"
 
             # If no keywords matched, default to neutral for browsers
             return "neutral"
