@@ -53,23 +53,34 @@ class ActivityTracker:
 
         current_time = datetime.now()
 
+        # Always track time if we have a previous timestamp
         if self.last_timestamp:
             duration = (current_time - self.last_timestamp).total_seconds()
-            duration_minutes = duration / 60
 
-            if category == "productive":
-                self.db_manager.update_progress(productive_mins=duration_minutes)
-            elif category == "distracting":
-                self.db_manager.update_progress(distracting_mins=duration_minutes)
-            elif category == "neutral":
-                self.db_manager.update_progress(neutral_mins=duration_minutes)
+            # Only update if there's actual time passed
+            if duration > 0:
+                self.db_manager.add_activity(
+                    app_name=app_name,
+                    window_title=window_title,
+                    category=category,
+                    duration_seconds=int(duration)
+                )
 
-        self.db_manager.add_activity(
-            app_name=app_name,
-            window_title=window_title,
-            category=category,
-            duration_seconds=self.interval
-        )
+                duration_minutes = duration / 60
+                if category == "productive":
+                    self.db_manager.update_progress(productive_mins=duration_minutes)
+                elif category == "distracting":
+                    self.db_manager.update_progress(distracting_mins=duration_minutes)
+                elif category == "neutral":
+                    self.db_manager.update_progress(neutral_mins=duration_minutes)
+        else:
+            # First time tracking
+            self.db_manager.add_activity(
+                app_name=app_name,
+                window_title=window_title,
+                category=category,
+                duration_seconds=0
+            )
 
         self.last_activity = current_activity
         self.last_timestamp = current_time

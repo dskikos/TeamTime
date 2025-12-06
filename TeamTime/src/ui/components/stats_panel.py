@@ -8,16 +8,23 @@ class StatsPanel(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
+        layout.setSpacing(12)
 
-        self.title_label = QLabel("Today's Statistics")
+        self.title_label = QLabel("📈 Today's Statistics")
         self.title_label.setAlignment(Qt.AlignCenter)
-        self.title_label.setStyleSheet("font-size: 14px; font-weight: bold; margin: 10px;")
+        self.title_label.setStyleSheet("""
+            font-size: 20px;
+            font-weight: bold;
+            margin: 8px;
+            color: #4a5568;
+        """)
 
         stats_layout = QHBoxLayout()
+        stats_layout.setSpacing(12)
 
-        self.productive_widget = self.create_stat_widget("Productive", "0 min", "#27ae60")
-        self.neutral_widget = self.create_stat_widget("Neutral", "0 min", "#95a5a6")
-        self.distracting_widget = self.create_stat_widget("Distracting", "0 min", "#e74c3c")
+        self.productive_widget = self.create_stat_widget("✨ Productive", "0 min", "#a8e6cf", "#2d5f47")
+        self.neutral_widget = self.create_stat_widget("⚪ Neutral", "0 min", "#d4d4d4", "#4a5568")
+        self.distracting_widget = self.create_stat_widget("⚠️ Distracting", "0 min", "#ffb3ba", "#8b2e2e")
 
         stats_layout.addWidget(self.productive_widget)
         stats_layout.addWidget(self.neutral_widget)
@@ -28,21 +35,38 @@ class StatsPanel(QWidget):
 
         self.setLayout(layout)
 
-    def create_stat_widget(self, title, value, color):
+    def create_stat_widget(self, title, value, bg_color, text_color):
         frame = QFrame()
-        frame.setFrameShape(QFrame.StyledPanel)
-        frame.setStyleSheet(f"background-color: {color}; border-radius: 5px; padding: 10px;")
+        frame.setFrameShape(QFrame.NoFrame)
+        frame.setStyleSheet(f"""
+            QFrame {{
+                background-color: {bg_color};
+                border-radius: 20px;
+                padding: 18px;
+            }}
+        """)
 
         layout = QVBoxLayout()
+        layout.setSpacing(8)
 
         title_label = QLabel(title)
         title_label.setAlignment(Qt.AlignCenter)
-        title_label.setStyleSheet("font-size: 12px; font-weight: bold; color: white;")
+        title_label.setStyleSheet(f"""
+            font-size: 15px;
+            font-weight: 600;
+            color: {text_color};
+        """)
 
         value_label = QLabel(value)
         value_label.setAlignment(Qt.AlignCenter)
-        value_label.setStyleSheet("font-size: 16px; font-weight: bold; color: white;")
-        value_label.setObjectName(f"{title.lower()}_value")
+        value_label.setStyleSheet(f"""
+            font-size: 24px;
+            font-weight: bold;
+            color: {text_color};
+        """)
+        # Extract just the word for the object name (remove emoji)
+        clean_title = ''.join(c for c in title if c.isalnum() or c.isspace()).strip().lower()
+        value_label.setObjectName(f"{clean_title}_value")
 
         layout.addWidget(title_label)
         layout.addWidget(value_label)

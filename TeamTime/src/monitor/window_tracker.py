@@ -32,6 +32,25 @@ class WindowTracker:
             try:
                 process = psutil.Process(pid)
                 app_name = process.name().lower().replace('.exe', '')
+
+                # If TeamTime is the active window, get the window behind it
+                if 'python' in app_name and 'teamtime' in window_title.lower():
+                    # Get all windows
+                    windows = gw.getAllWindows()
+                    # Filter out TeamTime windows and invisible windows
+                    for window in windows:
+                        if window.title and 'teamtime' not in window.title.lower() and window.visible:
+                            try:
+                                # Get process info for this window
+                                hwnd_behind = win32gui.FindWindow(None, window.title)
+                                if hwnd_behind:
+                                    _, pid_behind = win32process.GetWindowThreadProcessId(hwnd_behind)
+                                    process_behind = psutil.Process(pid_behind)
+                                    app_name_behind = process_behind.name().lower().replace('.exe', '')
+                                    return window.title, app_name_behind
+                            except:
+                                continue
+
                 return window_title, app_name
             except:
                 return window_title, "unknown"

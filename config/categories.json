@@ -1,0 +1,23 @@
+{
+  "productive": [
+    "vscode", "visual studio code", "pycharm", "intellij", "eclipse",
+    "sublime", "notepad++", "atom", "vim", "emacs", "code",
+    "github", "gitlab", "stackoverflow", "documentation",
+    "jupyter", "anaconda", "terminal", "powershell", "cmd", "bash",
+    "git", "docker", "postman", "figma", "adobe", "photoshop",
+    "illustrator", "xd", "notion", "obsidian", "jira", "trello",
+    "asana", "slack", "teams", "zoom", "meet", "excel", "word",
+    "powerpoint", "sheets", "docs", "slides", "calendar", "mail", "outlook"
+  ],
+  "distracting": [
+    "instagram", "facebook", "twitter", "tiktok", "youtube", "reddit",
+    "twitch", "netflix", "hulu", "disney", "spotify", "gaming",
+    "steam", "epic games", "league of legends", "fortnite", "valorant",
+    "minecraft", "roblox", "discord", "snapchat", "whatsapp",
+    "telegram", "messenger", "9gag", "imgur", "pinterest", "tumblr"
+  ],
+  "neutral": [
+    "explorer", "finder", "chrome", "firefox", "edge", "safari",
+    "opera", "settings", "preferences", "system"
+  ]
+}

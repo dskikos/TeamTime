@@ -1,10 +1,15 @@
 import json
 import os
+from pathlib import Path
 from anthropic import Anthropic
 
 class Categorizer:
-    def __init__(self, config_path='config/categories.json', use_llm=False):
-        self.config_path = config_path
+    def __init__(self, config_path=None, use_llm=False):
+        if config_path is None:
+            # Get the correct path relative to the project root
+            base_dir = Path(__file__).resolve().parent.parent.parent
+            config_path = base_dir / 'config' / 'categories.json'
+        self.config_path = str(config_path)
         self.categories = self.load_categories()
         self.use_llm = use_llm
         self.client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY")) if use_llm else None
