@@ -1,14 +1,29 @@
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QTextEdit, QPushButton
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QTextEdit, QPushButton, QLabel, QHBoxLayout
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from io import BytesIO
 
 class HistoryWindow(QDialog):
     def __init__(self, activities, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Activity History")
-        self.setGeometry(200, 200, 700, 500)
+        self.setGeometry(200, 200, 900, 600)
         self.setStyleSheet("background-color: #1a1a1a; color: #ffffff;")
 
-        layout = QVBoxLayout()
+        layout = QHBoxLayout()
+
+        # Left side - pie chart
+        chart_layout = QVBoxLayout()
+        self.chart_label = QLabel()
+        self.create_pie_chart(activities)
+        chart_layout.addWidget(self.chart_label)
+        chart_layout.addStretch()
+
+        # Right side - activity table
+        right_layout = QVBoxLayout()
 
         self.text_display = QTextEdit()
         self.text_display.setReadOnly(True)
@@ -59,6 +74,48 @@ class HistoryWindow(QDialog):
             }
         """)
 
-        layout.addWidget(self.text_display)
-        layout.addWidget(close_button)
+        right_layout.addWidget(self.text_display)
+        right_layout.addWidget(close_button)
+
+        layout.addLayout(chart_layout)
+        layout.addLayout(right_layout)
         self.setLayout(layout)
+
+    def create_pie_chart(self, activities):
+        productive_mins = 0
+        distracting_mins = 0
+        neutral_mins = 0
+
+        for act in activities:
+            duration = act.duration_seconds / 60
+            if act.category == "productive":
+                productive_mins += duration
+            elif act.category == "distracting":
+                distracting_mins += duration
+            elif act.category == "neutral":
+                neutral_mins += duration
+
+        total = productive_mins + distracting_mins + neutral_mins
+        if total == 0:
+            return
+
+        sizes = [productive_mins, distracting_mins, neutral_mins]
+        labels = [f'Productive\n{productive_mins:.1f} min',
+                  f'Distracting\n{distracting_mins:.1f} min',
+                  f'Neutral\n{neutral_mins:.1f} min']
+        colors = ['#27ae60', '#e74c3c', '#95a5a6']
+
+        fig, ax = plt.subplots(figsize=(5, 5), facecolor='#1a1a1a')
+        ax.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%',
+               startangle=90, textprops={'color': 'white', 'fontsize': 11})
+        ax.axis('equal')
+        plt.title('Time Distribution', color='white', fontsize=14, pad=20)
+
+        buf = BytesIO()
+        plt.savefig(buf, format='png', facecolor='#1a1a1a', bbox_inches='tight')
+        buf.seek(0)
+        plt.close()
+
+        pixmap = QPixmap()
+        pixmap.loadFromData(buf.getvalue())
+        self.chart_label.setPixmap(pixmap)

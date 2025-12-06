@@ -27,8 +27,7 @@ class ActivityTracker:
     def stop(self):
         self.running = False
         if self.thread:
-            self.thread.join()
-        print("Activity tracking stopped")
+            self.thread.join(timeout=1)
 
     def _track_loop(self):
         while self.running:
