@@ -99,6 +99,12 @@ class Dashboard(QMainWindow):
                 )
 
     def closeEvent(self, event):
+        # Stop the update timer first
+        if hasattr(self, 'update_timer'):
+            self.update_timer.stop()
+
+        # Stop activity tracking
         if self.activity_tracker.running:
             self.activity_tracker.stop()
+
         event.accept()
