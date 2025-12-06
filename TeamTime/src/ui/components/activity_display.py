@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QFrame, QPushButton
 from PyQt5.QtCore import Qt, pyqtSignal
 
+
 class ActivityDisplay(QWidget):
     category_changed = pyqtSignal(str, str, str)  # app_name, window_title, new_category
 
@@ -12,51 +13,49 @@ class ActivityDisplay(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        layout.setSpacing(10)
+        layout.setSpacing(15)
 
         self.title_label = QLabel("💻 Current Activity")
         self.title_label.setAlignment(Qt.AlignCenter)
         self.title_label.setStyleSheet("""
-            font-size: 20px;
+            font-size: 22px;
             font-weight: bold;
-            margin: 8px;
-            color: #4a5568;
+            margin-bottom: 5px;
+            color: #ffffff;
         """)
 
         self.frame = QFrame()
         self.frame.setFrameShape(QFrame.NoFrame)
         self.frame.setStyleSheet("""
             QFrame {
-                background-color: #ffffff;
+                background-color: #1a1a1a;
+                border: 2px solid #333333;
                 border-radius: 20px;
-                padding: 18px;
+                padding: 20px;
             }
         """)
 
         frame_layout = QVBoxLayout()
-        frame_layout.setSpacing(8)
+        frame_layout.setSpacing(10)
 
         self.app_label = QLabel("App: -")
         self.app_label.setStyleSheet("""
-            font-size: 16px;
-            margin: 5px;
-            color: #4a5568;
-            font-weight: 500;
+            font-size: 17px;
+            color: #ffffff;
+            font-weight: 600;
         """)
 
         self.window_label = QLabel("Window: -")
         self.window_label.setStyleSheet("""
             font-size: 14px;
-            margin: 5px;
-            color: #718096;
+            color: #888888;
         """)
         self.window_label.setWordWrap(True)
 
         self.category_label = QLabel("Category: -")
         self.category_label.setStyleSheet("""
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
-            margin: 5px;
         """)
 
         frame_layout.addWidget(self.app_label)
@@ -142,26 +141,25 @@ class ActivityDisplay(QWidget):
         self.window_label.setText(f"Window: {window_title[:100]}...")
 
         category_colors = {
-            'productive': '#a8e6cf',
-            'distracting': '#ffb3ba',
-            'neutral': '#d4d4d4'
+            'productive': '#ffffff',
+            'distracting': '#888888',
+            'neutral': '#444444'
         }
 
         category_text_colors = {
-            'productive': '#2d5f47',
-            'distracting': '#8b2e2e',
-            'neutral': '#4a5568'
+            'productive': '#0a0a0a',
+            'distracting': '#0a0a0a',
+            'neutral': '#ffffff'
         }
 
-        bg_color = category_colors.get(category, '#d4d4d4')
-        text_color = category_text_colors.get(category, '#4a5568')
+        bg_color = category_colors.get(category, '#444444')
+        text_color = category_text_colors.get(category, '#ffffff')
         self.category_label.setText(f"Category: {category.upper()}")
         self.category_label.setStyleSheet(f"""
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
-            margin: 5px;
             color: {text_color};
             background-color: {bg_color};
-            padding: 8px 16px;
+            padding: 10px 18px;
             border-radius: 12px;
         """)

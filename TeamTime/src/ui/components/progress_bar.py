@@ -16,7 +16,7 @@ class ProgressBarWidget(QWidget):
             font-size: 26px;
             font-weight: bold;
             margin: 10px;
-            color: #4a5568;
+            color: #ffffff;
         """)
 
         self.progress_bar = QProgressBar()
@@ -27,18 +27,18 @@ class ProgressBarWidget(QWidget):
         self.progress_bar.setFormat("%p%")
         self.progress_bar.setStyleSheet("""
             QProgressBar {
-                border: none;
+                border: 2px solid #333333;
                 border-radius: 25px;
                 text-align: center;
                 height: 50px;
                 font-size: 18px;
                 font-weight: bold;
-                background-color: #e2e8f0;
-                color: #2d3748;
+                background-color: #1a1a1a;
+                color: #ffffff;
             }
             QProgressBar::chunk {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #bae1ff, stop:1 #a8e6cf);
+                    stop:0 #ffffff, stop:1 #888888);
                 border-radius: 25px;
             }
         """)
@@ -48,7 +48,7 @@ class ProgressBarWidget(QWidget):
         self.stats_label.setStyleSheet("""
             font-size: 18px;
             margin: 8px;
-            color: #718096;
+            color: #888888;
             font-weight: 500;
         """)
 
@@ -64,36 +64,36 @@ class ProgressBarWidget(QWidget):
         if percentage >= 100:
             self.progress_bar.setStyleSheet("""
                 QProgressBar {
-                    border: none;
+                    border: 2px solid #333333;
                     border-radius: 25px;
                     text-align: center;
                     height: 50px;
                     font-size: 18px;
                     font-weight: bold;
-                    background-color: #e2e8f0;
-                    color: #2d3748;
+                    background-color: #1a1a1a;
+                    color: #ffffff;
                 }
                 QProgressBar::chunk {
                     background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                        stop:0 #a8e6cf, stop:1 #dcedc8);
+                        stop:0 #ffffff, stop:1 #cccccc);
                     border-radius: 25px;
                 }
             """)
         else:
             self.progress_bar.setStyleSheet("""
                 QProgressBar {
-                    border: none;
+                    border: 2px solid #333333;
                     border-radius: 25px;
                     text-align: center;
                     height: 50px;
                     font-size: 18px;
                     font-weight: bold;
-                    background-color: #e2e8f0;
-                    color: #2d3748;
+                    background-color: #1a1a1a;
+                    color: #ffffff;
                 }
                 QProgressBar::chunk {
                     background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                        stop:0 #bae1ff, stop:1 #a8e6cf);
+                        stop:0 #ffffff, stop:1 #888888);
                     border-radius: 25px;
                 }
             """)

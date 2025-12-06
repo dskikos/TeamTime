@@ -18,7 +18,7 @@ class BlockDisplay(QWidget):
             font-size: 20px;
             font-weight: bold;
             margin: 8px;
-            color: #4a5568;
+            color: #ffffff;
         """)
 
         # Status Frame
@@ -26,7 +26,8 @@ class BlockDisplay(QWidget):
         self.status_frame.setFrameShape(QFrame.NoFrame)
         self.status_frame.setStyleSheet("""
             QFrame {
-                background-color: #ffffff;
+                background-color: #1a1a1a;
+                border: 2px solid #333333;
                 border-radius: 20px;
                 padding: 18px;
             }
@@ -38,7 +39,7 @@ class BlockDisplay(QWidget):
         self.status_label.setStyleSheet("""
             font-size: 16px;
             margin: 5px;
-            color: #4a5568;
+            color: #ffffff;
             font-weight: 500;
         """)
 
@@ -46,14 +47,14 @@ class BlockDisplay(QWidget):
         self.limit_label.setStyleSheet("""
             font-size: 14px;
             margin: 5px;
-            color: #718096;
+            color: #888888;
         """)
 
         self.sites_label = QLabel("Blocked sites: None")
         self.sites_label.setStyleSheet("""
             font-size: 14px;
             margin: 5px;
-            color: #718096;
+            color: #888888;
         """)
         self.sites_label.setWordWrap(True)
 
@@ -79,8 +80,8 @@ class BlockDisplay(QWidget):
                 background-color: #ff3838;
             }
             QPushButton:disabled {
-                background-color: #d4d4d4;
-                color: #888888;
+                background-color: #2a2a2a;
+                color: #555555;
             }
         """)
 
@@ -112,7 +113,7 @@ class BlockDisplay(QWidget):
             self.status_label.setStyleSheet("""
                 font-size: 16px;
                 margin: 5px;
-                color: #a8e6cf;
+                color: #888888;
                 font-weight: 600;
             """)
             self.sites_label.setText("Blocked sites: None")

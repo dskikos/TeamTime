@@ -26,14 +26,26 @@ class ActivityTracker:
 
     def stop(self):
         self.running = False
-        if self.thread:
-            self.thread.join(timeout=1)
+        if self.thread and self.thread.is_alive():
+            self.thread.join(timeout=2)
+
+        # Ensure database connection is closed
+        try:
+            self.db_manager.close()
+        except:
+            pass
 
     def _track_loop(self):
         while self.running:
             try:
-                time.sleep(self.interval)
-                self._track_current_activity()
+                # Sleep in small chunks to allow faster shutdown response
+                elapsed = 0
+                while elapsed < self.interval and self.running:
+                    time.sleep(0.1)
+                    elapsed += 0.1
+
+                if self.running:
+                    self._track_current_activity()
             except Exception as e:
                 print(f"Error in tracking loop: {e}")
 

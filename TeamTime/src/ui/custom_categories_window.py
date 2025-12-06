@@ -8,7 +8,7 @@ class CustomCategoriesWindow(QDialog):
         self.categorizer = categorizer
         self.setWindowTitle("Custom Categories")
         self.setGeometry(200, 200, 700, 600)
-        self.setStyleSheet("background-color: #f8f9fa;")
+        self.setStyleSheet("background-color: #0a0a0a; color: #ffffff;")
 
         self.init_ui()
         self.load_custom_categories()
@@ -24,7 +24,7 @@ class CustomCategoriesWindow(QDialog):
         title_label.setStyleSheet("""
             font-size: 24px;
             font-weight: bold;
-            color: #4a5568;
+            color: #ffffff;
             margin-bottom: 10px;
         """)
 
@@ -33,8 +33,8 @@ class CustomCategoriesWindow(QDialog):
         productive_label.setStyleSheet("""
             font-size: 18px;
             font-weight: bold;
-            color: #2d5f47;
-            background-color: #a8e6cf;
+            color: #ffffff;
+            background-color: #27ae60;
             padding: 8px;
             border-radius: 8px;
         """)
@@ -42,8 +42,9 @@ class CustomCategoriesWindow(QDialog):
         self.productive_list = QListWidget()
         self.productive_list.setStyleSheet("""
             QListWidget {
-                background-color: white;
-                border: 2px solid #a8e6cf;
+                background-color: #1a1a1a;
+                color: #ffffff;
+                border: 2px solid #27ae60;
                 border-radius: 10px;
                 padding: 5px;
                 font-size: 14px;
@@ -53,7 +54,7 @@ class CustomCategoriesWindow(QDialog):
                 border-radius: 5px;
             }
             QListWidget::item:hover {
-                background-color: #e8f5e9;
+                background-color: #2a2a2a;
             }
         """)
 
@@ -62,8 +63,8 @@ class CustomCategoriesWindow(QDialog):
         distracting_label.setStyleSheet("""
             font-size: 18px;
             font-weight: bold;
-            color: #8b2e2e;
-            background-color: #ffb3ba;
+            color: #ffffff;
+            background-color: #e74c3c;
             padding: 8px;
             border-radius: 8px;
         """)
@@ -71,8 +72,9 @@ class CustomCategoriesWindow(QDialog):
         self.distracting_list = QListWidget()
         self.distracting_list.setStyleSheet("""
             QListWidget {
-                background-color: white;
-                border: 2px solid #ffb3ba;
+                background-color: #1a1a1a;
+                color: #ffffff;
+                border: 2px solid #e74c3c;
                 border-radius: 10px;
                 padding: 5px;
                 font-size: 14px;
@@ -82,7 +84,7 @@ class CustomCategoriesWindow(QDialog):
                 border-radius: 5px;
             }
             QListWidget::item:hover {
-                background-color: #ffebee;
+                background-color: #2a2a2a;
             }
         """)
 
@@ -91,8 +93,8 @@ class CustomCategoriesWindow(QDialog):
         neutral_label.setStyleSheet("""
             font-size: 18px;
             font-weight: bold;
-            color: #4a5568;
-            background-color: #d4d4d4;
+            color: #ffffff;
+            background-color: #95a5a6;
             padding: 8px;
             border-radius: 8px;
         """)
@@ -100,8 +102,9 @@ class CustomCategoriesWindow(QDialog):
         self.neutral_list = QListWidget()
         self.neutral_list.setStyleSheet("""
             QListWidget {
-                background-color: white;
-                border: 2px solid #d4d4d4;
+                background-color: #1a1a1a;
+                color: #ffffff;
+                border: 2px solid #95a5a6;
                 border-radius: 10px;
                 padding: 5px;
                 font-size: 14px;
@@ -111,7 +114,7 @@ class CustomCategoriesWindow(QDialog):
                 border-radius: 5px;
             }
             QListWidget::item:hover {
-                background-color: #f5f5f5;
+                background-color: #2a2a2a;
             }
         """)
 
@@ -125,13 +128,13 @@ class CustomCategoriesWindow(QDialog):
                 padding: 12px 24px;
                 font-size: 14px;
                 font-weight: 600;
-                background-color: #ff6b6b;
+                background-color: #e74c3c;
                 color: white;
                 border: none;
                 border-radius: 10px;
             }
             QPushButton:hover {
-                background-color: #ff5252;
+                background-color: #c0392b;
             }
         """)
 
@@ -142,13 +145,13 @@ class CustomCategoriesWindow(QDialog):
                 padding: 12px 24px;
                 font-size: 14px;
                 font-weight: 600;
-                background-color: #4a5568;
+                background-color: #333333;
                 color: white;
                 border: none;
                 border-radius: 10px;
             }
             QPushButton:hover {
-                background-color: #3a4558;
+                background-color: #444444;
             }
         """)
 
