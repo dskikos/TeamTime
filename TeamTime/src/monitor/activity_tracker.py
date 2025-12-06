@@ -45,6 +45,10 @@ class ActivityTracker:
 
         category = self.categorizer.categorize(app_name, window_title)
 
+        # Debug: Print window title for browsers to help understand what we're getting
+        if app_name in ['firefox', 'chrome', 'brave', 'edge', 'safari']:
+            print(f"[BROWSER DEBUG] App: {app_name}, Title: '{window_title}', Category: {category}")
+
         current_activity = {
             'app_name': app_name,
             'window_title': window_title,

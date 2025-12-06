@@ -4,7 +4,7 @@ from pathlib import Path
 from anthropic import Anthropic
 
 class Categorizer:
-    def __init__(self, config_path=None, use_llm=False):
+    def __init__(self, config_path=None, use_llm=True):
         if config_path is None:
             # Get the correct path relative to the project root
             base_dir = Path(__file__).resolve().parent.parent.parent
@@ -137,8 +137,71 @@ class Categorizer:
                 if title_lower.startswith('new tab') or title_lower.startswith('start page'):
                     return "neutral"
 
-            # If no specific site detected, default to neutral for browsers
-            # (changed from distracting to be less aggressive)
+            # If no specific site detected, analyze the tab title with keywords
+            # This is perfect for ChatGPT tabs where the title is just the chat name
+
+            # Extract just the tab title (remove browser name)
+            tab_title_lower = title_lower
+            for browser in ['mozilla firefox', 'google chrome', 'microsoft edge', 'brave', 'safari', 'opera']:
+                if browser in title_lower:
+                    # Remove the browser name from the title
+                    parts = window_title.split('–')  # Using en-dash
+                    if len(parts) > 1:
+                        tab_title_lower = parts[0].strip().lower()
+                    else:
+                        parts = window_title.split('-')  # Try regular dash
+                        if len(parts) > 1:
+                            tab_title_lower = parts[0].strip().lower()
+                    break
+
+            # Productive keywords for chat titles
+            productive_keywords = [
+                # Programming
+                'code', 'coding', 'programming', 'python', 'javascript', 'java', 'c++', 'html', 'css',
+                'debug', 'error', 'bug', 'algorithm', 'function', 'class', 'variable',
+                'git', 'github', 'commit', 'push', 'pull', 'merge', 'branch',
+                # Math & Science
+                'fourier', 'transform', 'integral', 'derivative', 'equation', 'matrix',
+                'linear', 'algebra', 'calculus', 'statistics', 'probability',
+                'physik', 'physics', 'chemie', 'chemistry', 'mathe', 'math',
+                # Engineering
+                'lti', 'system', 'signal', 'filter', 'frequency', 'amplitude',
+                'circuit', 'engineering', 'optimization',
+                # Study/Learning
+                'learn', 'study', 'tutorial', 'homework', 'assignment', 'thesis',
+                'research', 'paper', 'article', 'university', 'course',
+                'erkl', 'explain', 'verstehen', 'understand'
+            ]
+
+            # Distracting keywords for chat titles
+            distracting_keywords = [
+                # Gaming
+                'fortnite', 'minecraft', 'game', 'gaming', 'roblox', 'valorant',
+                'league', 'dota', 'csgo', 'overwatch', 'apex', 'warzone',
+                'strategy', 'strategien', 'tips', 'tricks', 'walkthrough',
+                # Entertainment
+                'movie', 'film', 'serie', 'series', 'netflix', 'video',
+                'music', 'song', 'album', 'concert', 'festival',
+                'meme', 'funny', 'joke', 'entertainment',
+                # Shopping
+                'buy', 'kaufen', 'shopping', 'sale', 'deal', 'price'
+            ]
+
+            # Check for productive keywords
+            for keyword in productive_keywords:
+                if keyword in tab_title_lower:
+                    return "productive"
+
+            # Check for distracting keywords
+            for keyword in distracting_keywords:
+                if keyword in tab_title_lower:
+                    return "distracting"
+
+            # If LLM available, use it as fallback
+            if self.use_llm and self.client:
+                return self._categorize_with_llm(app_name, window_title)
+
+            # If no LLM available and no keywords matched, default to neutral for browsers
             return "neutral"
 
         # Check productive apps/keywords
@@ -168,18 +231,42 @@ class Categorizer:
             return self.cache[cache_key]
 
         try:
+            # Extract just the tab title (remove browser name)
+            tab_title = window_title
+            for browser in ['mozilla firefox', 'google chrome', 'microsoft edge', 'brave', 'safari', 'opera']:
+                if browser in window_title.lower():
+                    # Remove the browser name from the title
+                    parts = window_title.split('–')  # Using en-dash
+                    if len(parts) > 1:
+                        tab_title = parts[0].strip()
+                    else:
+                        parts = window_title.split('-')  # Try regular dash
+                        if len(parts) > 1:
+                            tab_title = parts[0].strip()
+                    break
+
             message = self.client.messages.create(
                 model="claude-3-haiku-20240307",
                 max_tokens=50,
                 messages=[{
                     "role": "user",
-                    "content": f"Categorize this activity as 'productive', 'distracting', or 'neutral':\nApp: {app_name}\nWindow: {window_title}\n\nRespond with ONLY one word: productive, distracting, or neutral."
+                    "content": f"""Categorize this browser tab as 'productive', 'distracting', or 'neutral'.
+
+Tab title: "{tab_title}"
+
+Rules:
+- PRODUCTIVE: Programming, coding, studying, learning, work, research, math, science, technical topics, ChatGPT/Claude chats about work/code/learning
+- DISTRACTING: Gaming, entertainment, social media, videos, shopping, ChatGPT/Claude chats about games/entertainment
+- NEUTRAL: General browsing, news, email, communication tools
+
+Respond with ONLY one word: productive, distracting, or neutral."""
                 }]
             )
 
             category = message.content[0].text.strip().lower()
             if category in ['productive', 'distracting', 'neutral']:
                 self.cache[cache_key] = category
+                print(f"[LLM CATEGORIZATION] Title: '{tab_title}' -> {category}")
                 return category
         except Exception as e:
             print(f"LLM categorization error: {e}")
