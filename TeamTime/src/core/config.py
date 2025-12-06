@@ -9,7 +9,7 @@ class Config:
     DATABASE_PATH = DATA_DIR / 'teamtime.db'
     CATEGORIES_PATH = CONFIG_DIR / 'categories.json'
 
-    TRACKING_INTERVAL = 10
+    TRACKING_INTERVAL = 2
     PENALTY_FACTOR = 0.5
 
     DEFAULT_GOAL_MINUTES = 240

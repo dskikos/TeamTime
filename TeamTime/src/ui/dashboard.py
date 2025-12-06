@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QPushButton,
                              QInputDialog, QMessageBox, QHBoxLayout)
 from PyQt5.QtCore import QTimer
 from ui.components import ProgressBarWidget, ActivityDisplay, StatsPanel
+from ui.history_window import HistoryWindow
 from monitor import ActivityTracker
 from core import GoalManager, ProgressCalculator, Config
 
@@ -21,14 +22,12 @@ class Dashboard(QMainWindow):
     def init_ui(self):
         self.setWindowTitle("TeamTime - Productivity Tracker")
         self.setGeometry(100, 100, 600, 500)
+        self.setStyleSheet("background-color: #0d0d0d; color: #ffffff;")
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
 
         layout = QVBoxLayout()
-
-        self.progress_widget = ProgressBarWidget()
-        layout.addWidget(self.progress_widget)
 
         self.activity_display = ActivityDisplay()
         layout.addWidget(self.activity_display)
@@ -38,22 +37,16 @@ class Dashboard(QMainWindow):
 
         button_layout = QHBoxLayout()
 
-        self.start_button = QPushButton("Start Tracking")
-        self.start_button.clicked.connect(self.start_tracking)
-        self.start_button.setStyleSheet("padding: 10px; font-size: 14px; background-color: #27ae60; color: white; border-radius: 5px;")
+        self.track_button = QPushButton("Start Tracking")
+        self.track_button.clicked.connect(self.toggle_tracking)
+        self.track_button.setStyleSheet("padding: 15px; font-size: 16px; background-color: #ffffff; color: #000000; border: 2px solid #333333; border-radius: 5px; font-weight: bold;")
 
-        self.stop_button = QPushButton("Stop Tracking")
-        self.stop_button.clicked.connect(self.stop_tracking)
-        self.stop_button.setEnabled(False)
-        self.stop_button.setStyleSheet("padding: 10px; font-size: 14px; background-color: #e74c3c; color: white; border-radius: 5px;")
+        self.history_button = QPushButton("View History")
+        self.history_button.clicked.connect(self.show_history)
+        self.history_button.setStyleSheet("padding: 15px; font-size: 16px; background-color: #1a1a1a; color: #ffffff; border: 2px solid #333333; border-radius: 5px; font-weight: bold;")
 
-        self.goal_button = QPushButton("Set Goal")
-        self.goal_button.clicked.connect(self.set_goal)
-        self.goal_button.setStyleSheet("padding: 10px; font-size: 14px; background-color: #3498db; color: white; border-radius: 5px;")
-
-        button_layout.addWidget(self.start_button)
-        button_layout.addWidget(self.stop_button)
-        button_layout.addWidget(self.goal_button)
+        button_layout.addWidget(self.track_button)
+        button_layout.addWidget(self.history_button)
 
         layout.addLayout(button_layout)
 
@@ -67,44 +60,28 @@ class Dashboard(QMainWindow):
     def check_goal(self):
         goal = self.goal_manager.get_daily_goal()
         if not goal:
-            self.set_goal(show_message=False)
+            self.goal_manager.set_daily_goal(99999)
 
-    def start_tracking(self):
-        self.activity_tracker.start()
-        self.start_button.setEnabled(False)
-        self.stop_button.setEnabled(True)
+    def toggle_tracking(self):
+        if self.activity_tracker.running:
+            self.activity_tracker.stop()
+            self.track_button.setText("Start Tracking")
+            self.track_button.setStyleSheet("padding: 15px; font-size: 16px; background-color: #ffffff; color: #000000; border: 2px solid #333333; border-radius: 5px; font-weight: bold;")
+        else:
+            self.activity_tracker.start()
+            self.track_button.setText("Stop Tracking")
+            self.track_button.setStyleSheet("padding: 15px; font-size: 16px; background-color: #000000; color: #ffffff; border: 2px solid #ffffff; border-radius: 5px; font-weight: bold;")
 
-    def stop_tracking(self):
-        self.activity_tracker.stop()
-        self.start_button.setEnabled(True)
-        self.stop_button.setEnabled(False)
+    def show_history(self):
+        from database import DatabaseManager
+        db = DatabaseManager()
+        activities = db.get_activities_by_date()
 
-    def set_goal(self, show_message=True):
-        current_goal = self.goal_manager.get_daily_goal()
-        default_value = current_goal.target_minutes if current_goal else Config.DEFAULT_GOAL_MINUTES
-
-        minutes, ok = QInputDialog.getInt(
-            self,
-            "Set Daily Goal",
-            "Enter your daily productivity goal (minutes):",
-            default_value,
-            1,
-            1440
-        )
-
-        if ok:
-            self.goal_manager.set_daily_goal(minutes)
-            if show_message:
-                QMessageBox.information(self, "Goal Set", f"Daily goal set to {minutes} minutes!")
+        history_window = HistoryWindow(activities, self)
+        history_window.exec_()
 
     def update_display(self):
         progress_data = self.progress_calculator.get_summary()
-
-        self.progress_widget.update_progress(
-            progress_data['percentage'],
-            progress_data['effective_minutes'],
-            progress_data['target_minutes']
-        )
 
         self.stats_panel.update_stats(
             progress_data['productive_minutes'],
@@ -112,14 +89,16 @@ class Dashboard(QMainWindow):
             progress_data['distracting_minutes']
         )
 
-        current_activity = self.activity_tracker.get_current_activity()
-        if current_activity:
-            self.activity_display.update_activity(
-                current_activity['app_name'],
-                current_activity['window_title'],
-                current_activity['category']
-            )
+        if self.activity_tracker.running:
+            current_activity = self.activity_tracker.get_current_activity()
+            if current_activity:
+                self.activity_display.update_activity(
+                    current_activity['app_name'],
+                    current_activity['window_title'],
+                    current_activity['category']
+                )
 
     def closeEvent(self, event):
-        self.activity_tracker.stop()
+        if self.activity_tracker.running:
+            self.activity_tracker.stop()
         event.accept()

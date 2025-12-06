@@ -68,7 +68,9 @@
     "mail",
     "calendar",
     "finder",
-    "explorer",
+    "explorer"
+  ],
+  "distracting_browsers": [
     "chrome",
     "firefox",
     "safari",

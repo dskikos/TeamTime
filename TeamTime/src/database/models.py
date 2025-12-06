@@ -32,9 +32,9 @@ class Goal(BaseModel):
 
 class Progress(BaseModel):
     date = DateField(default=date.today, unique=True)
-    productive_minutes = IntegerField(default=0)
-    distracting_minutes = IntegerField(default=0)
-    neutral_minutes = IntegerField(default=0)
+    productive_minutes = FloatField(default=0)
+    distracting_minutes = FloatField(default=0)
+    neutral_minutes = FloatField(default=0)
 
     class Meta:
         table_name = 'progress'

@@ -22,10 +22,19 @@ class WindowTracker:
     def _get_windows_active_window(self):
         try:
             import pygetwindow as gw
-            window = gw.getActiveWindow()
-            if window:
-                return window.title, self._get_process_name_from_title(window.title)
-            return None, None
+            import win32process
+            import win32gui
+
+            hwnd = win32gui.GetForegroundWindow()
+            window_title = win32gui.GetWindowText(hwnd)
+            _, pid = win32process.GetWindowThreadProcessId(hwnd)
+
+            try:
+                process = psutil.Process(pid)
+                app_name = process.name().lower().replace('.exe', '')
+                return window_title, app_name
+            except:
+                return window_title, "unknown"
         except Exception as e:
             print(f"Windows tracking error: {e}")
             return None, None

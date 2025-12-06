@@ -19,6 +19,7 @@ class ActivityTracker:
     def start(self):
         if not self.running:
             self.running = True
+            self.last_timestamp = datetime.now()
             self.thread = threading.Thread(target=self._track_loop, daemon=True)
             self.thread.start()
             print("Activity tracking started")
@@ -32,8 +33,8 @@ class ActivityTracker:
     def _track_loop(self):
         while self.running:
             try:
-                self._track_current_activity()
                 time.sleep(self.interval)
+                self._track_current_activity()
             except Exception as e:
                 print(f"Error in tracking loop: {e}")
 
@@ -53,29 +54,23 @@ class ActivityTracker:
 
         current_time = datetime.now()
 
-        if self.last_activity and self.last_activity == current_activity:
+        if self.last_timestamp:
             duration = (current_time - self.last_timestamp).total_seconds()
-            self.db_manager.add_activity(
-                app_name=app_name,
-                window_title=window_title,
-                category=category,
-                duration_seconds=int(duration)
-            )
-
             duration_minutes = duration / 60
+
             if category == "productive":
                 self.db_manager.update_progress(productive_mins=duration_minutes)
             elif category == "distracting":
                 self.db_manager.update_progress(distracting_mins=duration_minutes)
             elif category == "neutral":
                 self.db_manager.update_progress(neutral_mins=duration_minutes)
-        else:
-            self.db_manager.add_activity(
-                app_name=app_name,
-                window_title=window_title,
-                category=category,
-                duration_seconds=0
-            )
+
+        self.db_manager.add_activity(
+            app_name=app_name,
+            window_title=window_title,
+            category=category,
+            duration_seconds=self.interval
+        )
 
         self.last_activity = current_activity
         self.last_timestamp = current_time

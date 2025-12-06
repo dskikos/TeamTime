@@ -54,12 +54,18 @@ class StatsPanel(QWidget):
     def update_stats(self, productive_mins, neutral_mins, distracting_mins):
         productive_label = self.productive_widget.findChild(QLabel, "productive_value")
         if productive_label:
-            productive_label.setText(f"{int(productive_mins)} min")
+            mins = int(productive_mins)
+            secs = int((productive_mins - mins) * 60)
+            productive_label.setText(f"{mins}m {secs}s")
 
         neutral_label = self.neutral_widget.findChild(QLabel, "neutral_value")
         if neutral_label:
-            neutral_label.setText(f"{int(neutral_mins)} min")
+            mins = int(neutral_mins)
+            secs = int((neutral_mins - mins) * 60)
+            neutral_label.setText(f"{mins}m {secs}s")
 
         distracting_label = self.distracting_widget.findChild(QLabel, "distracting_value")
         if distracting_label:
-            distracting_label.setText(f"{int(distracting_mins)} min")
+            mins = int(distracting_mins)
+            secs = int((distracting_mins - mins) * 60)
+            distracting_label.setText(f"{mins}m {secs}s")
