@@ -18,7 +18,7 @@ class XPDisplay(QWidget):
         self.title_label.setStyleSheet("""
             font-size: 24px;
             font-weight: bold;
-            color: #4a5568;
+            color: #ffffff;
         """)
 
         self.level_label = QLabel("Level 1")
@@ -26,8 +26,8 @@ class XPDisplay(QWidget):
         self.level_label.setStyleSheet("""
             font-size: 26px;
             font-weight: bold;
-            color: #ffd700;
-            background-color: #4a5568;
+            color: #0a0a0a;
+            background-color: #ffffff;
             padding: 10px 24px;
             border-radius: 18px;
         """)
@@ -44,18 +44,18 @@ class XPDisplay(QWidget):
         self.xp_bar.setFormat("%v / %m XP")
         self.xp_bar.setStyleSheet("""
             QProgressBar {
-                border: none;
+                border: 2px solid #333333;
                 border-radius: 22px;
                 text-align: center;
                 height: 50px;
                 font-size: 18px;
                 font-weight: bold;
-                background-color: #e2e8f0;
-                color: #2d3748;
+                background-color: #1a1a1a;
+                color: #ffffff;
             }
             QProgressBar::chunk {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #ffd700, stop:1 #ffed4e);
+                    stop:0 #ffffff, stop:1 #aaaaaa);
                 border-radius: 18px;
             }
         """)
@@ -65,7 +65,7 @@ class XPDisplay(QWidget):
         self.xp_label.setAlignment(Qt.AlignCenter)
         self.xp_label.setStyleSheet("""
             font-size: 18px;
-            color: #718096;
+            color: #888888;
             font-weight: 500;
         """)
 

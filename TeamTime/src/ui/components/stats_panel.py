@@ -16,15 +16,15 @@ class StatsPanel(QWidget):
             font-size: 20px;
             font-weight: bold;
             margin: 8px;
-            color: #4a5568;
+            color: #ffffff;
         """)
 
         stats_layout = QHBoxLayout()
         stats_layout.setSpacing(12)
 
-        self.productive_widget = self.create_stat_widget("✨ Productive", "0 min", "#a8e6cf", "#2d5f47")
-        self.neutral_widget = self.create_stat_widget("⚪ Neutral", "0 min", "#d4d4d4", "#4a5568")
-        self.distracting_widget = self.create_stat_widget("⚠️ Distracting", "0 min", "#ffb3ba", "#8b2e2e")
+        self.productive_widget = self.create_stat_widget("✨ Productive", "0 min", "#1a1a1a", "#ffffff")
+        self.neutral_widget = self.create_stat_widget("⚪ Neutral", "0 min", "#1a1a1a", "#888888")
+        self.distracting_widget = self.create_stat_widget("⚠️ Distracting", "0 min", "#1a1a1a", "#ffffff")
 
         stats_layout.addWidget(self.productive_widget)
         stats_layout.addWidget(self.neutral_widget)
@@ -41,6 +41,7 @@ class StatsPanel(QWidget):
         frame.setStyleSheet(f"""
             QFrame {{
                 background-color: {bg_color};
+                border: 2px solid #333333;
                 border-radius: 20px;
                 padding: 18px;
             }}

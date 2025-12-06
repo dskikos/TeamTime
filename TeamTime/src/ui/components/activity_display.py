@@ -16,14 +16,15 @@ class ActivityDisplay(QWidget):
             font-size: 20px;
             font-weight: bold;
             margin: 8px;
-            color: #4a5568;
+            color: #ffffff;
         """)
 
         self.frame = QFrame()
         self.frame.setFrameShape(QFrame.NoFrame)
         self.frame.setStyleSheet("""
             QFrame {
-                background-color: #ffffff;
+                background-color: #1a1a1a;
+                border: 2px solid #333333;
                 border-radius: 20px;
                 padding: 18px;
             }
@@ -36,7 +37,7 @@ class ActivityDisplay(QWidget):
         self.app_label.setStyleSheet("""
             font-size: 16px;
             margin: 5px;
-            color: #4a5568;
+            color: #ffffff;
             font-weight: 500;
         """)
 
@@ -44,7 +45,7 @@ class ActivityDisplay(QWidget):
         self.window_label.setStyleSheet("""
             font-size: 14px;
             margin: 5px;
-            color: #718096;
+            color: #888888;
         """)
         self.window_label.setWordWrap(True)
 
@@ -71,15 +72,15 @@ class ActivityDisplay(QWidget):
         self.window_label.setText(f"Window: {window_title[:100]}...")
 
         category_colors = {
-            'productive': '#a8e6cf',
-            'distracting': '#ffb3ba',
-            'neutral': '#d4d4d4'
+            'productive': '#ffffff',
+            'distracting': '#888888',
+            'neutral': '#444444'
         }
 
         category_text_colors = {
-            'productive': '#2d5f47',
-            'distracting': '#8b2e2e',
-            'neutral': '#4a5568'
+            'productive': '#0a0a0a',
+            'distracting': '#0a0a0a',
+            'neutral': '#ffffff'
         }
 
         bg_color = category_colors.get(category, '#d4d4d4')

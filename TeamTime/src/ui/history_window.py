@@ -17,7 +17,7 @@ class HistoryWindow(QDialog):
         self.activities = activities
         self.setWindowTitle("📊 Activity History")
         self.setGeometry(100, 100, 1400, 800)
-        self.setStyleSheet("background-color: #f8f9fa;")
+        self.setStyleSheet("background-color: #0a0a0a;")
 
         self.init_ui()
 
@@ -31,7 +31,7 @@ class HistoryWindow(QDialog):
         title.setStyleSheet("""
             font-size: 28px;
             font-weight: bold;
-            color: #2d3748;
+            color: #ffffff;
             margin-bottom: 10px;
         """)
         title.setAlignment(Qt.AlignCenter)
@@ -92,7 +92,8 @@ class HistoryWindow(QDialog):
         container = QFrame()
         container.setStyleSheet("""
             QFrame {
-                background-color: white;
+                background-color: #1a1a1a;
+                border: 2px solid #333333;
                 border-radius: 15px;
                 padding: 20px;
             }
@@ -105,7 +106,7 @@ class HistoryWindow(QDialog):
         title_label.setStyleSheet("""
             font-size: 18px;
             font-weight: bold;
-            color: #4a5568;
+            color: #ffffff;
         """)
         title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(title_label)
@@ -135,25 +136,25 @@ class HistoryWindow(QDialog):
         labels = [f'Productive\n{productive_mins:.1f} min',
                   f'Distracting\n{distracting_mins:.1f} min',
                   f'Neutral\n{neutral_mins:.1f} min']
-        colors = ['#a8e6cf', '#ffb3ba', '#e0e0e0']
+        colors = ['#ffffff', '#888888', '#444444']
 
-        fig, ax = plt.subplots(figsize=(6, 6), facecolor='white')
+        fig, ax = plt.subplots(figsize=(6, 6), facecolor='#1a1a1a')
         wedges, texts, autotexts = ax.pie(sizes, labels=labels, colors=colors,
                                             autopct='%1.1f%%', startangle=90,
                                             textprops={'fontsize': 12, 'weight': 'bold'})
 
         for autotext in autotexts:
-            autotext.set_color('#2d3748')
+            autotext.set_color('#0a0a0a')
             autotext.set_fontsize(11)
 
         for text in texts:
-            text.set_color('#4a5568')
+            text.set_color('#ffffff')
             text.set_fontsize(11)
 
         ax.axis('equal')
 
         buf = BytesIO()
-        plt.savefig(buf, format='png', facecolor='white', bbox_inches='tight', dpi=100)
+        plt.savefig(buf, format='png', facecolor='#1a1a1a', bbox_inches='tight', dpi=100)
         buf.seek(0)
         plt.close()
 
@@ -187,7 +188,7 @@ class HistoryWindow(QDialog):
         sorted_times = sorted(minute_data.keys())
 
         # Create figure
-        fig, ax = plt.subplots(figsize=(10, 4), facecolor='white')
+        fig, ax = plt.subplots(figsize=(10, 4), facecolor='#1a1a1a')
 
         # Prepare data for stacked bar chart
         productive = [minute_data[t]['productive'] for t in sorted_times]
@@ -197,13 +198,13 @@ class HistoryWindow(QDialog):
         # Plot stacked bars
         bar_width = 0.8
         ax.bar(sorted_times, productive, bar_width, label='Productive',
-               color='#a8e6cf', edgecolor='none')
+               color='#ffffff', edgecolor='none')
         ax.bar(sorted_times, distracting, bar_width, bottom=productive,
-               label='Distracting', color='#ffb3ba', edgecolor='none')
+               label='Distracting', color='#888888', edgecolor='none')
 
         bottom = [p + d for p, d in zip(productive, distracting)]
         ax.bar(sorted_times, neutral, bar_width, bottom=bottom,
-               label='Neutral', color='#e0e0e0', edgecolor='none')
+               label='Neutral', color='#444444', edgecolor='none')
 
         # Format x-axis with smarter tick spacing
         num_ticks = min(20, len(sorted_times))
@@ -215,22 +216,23 @@ class HistoryWindow(QDialog):
             plt.xticks(rotation=45, ha='right')
 
         # Style
-        ax.set_ylabel('Minutes', fontsize=11, color='#4a5568', fontweight='bold')
-        ax.set_xlabel('Time', fontsize=11, color='#4a5568', fontweight='bold')
-        ax.legend(loc='upper left', frameon=True, fancybox=True, shadow=True)
-        ax.grid(True, alpha=0.2, linestyle='--', linewidth=0.5)
-        ax.set_facecolor('#f8f9fa')
+        ax.set_ylabel('Minutes', fontsize=11, color='#ffffff', fontweight='bold')
+        ax.set_xlabel('Time', fontsize=11, color='#ffffff', fontweight='bold')
+        ax.legend(loc='upper left', frameon=True, fancybox=True, shadow=False, facecolor='#2a2a2a', edgecolor='#444444', labelcolor='#ffffff')
+        ax.grid(True, alpha=0.1, linestyle='--', linewidth=0.5, color='#444444')
+        ax.set_facecolor('#0a0a0a')
+        ax.tick_params(colors='#ffffff')
 
         # Remove top and right spines
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
-        ax.spines['left'].set_color('#cbd5e0')
-        ax.spines['bottom'].set_color('#cbd5e0')
+        ax.spines['left'].set_color('#444444')
+        ax.spines['bottom'].set_color('#444444')
 
         plt.tight_layout()
 
         buf = BytesIO()
-        plt.savefig(buf, format='png', facecolor='white', bbox_inches='tight', dpi=100)
+        plt.savefig(buf, format='png', facecolor='#1a1a1a', bbox_inches='tight', dpi=100)
         buf.seek(0)
         plt.close()
 
@@ -269,8 +271,8 @@ class HistoryWindow(QDialog):
             time_block = QFrame()
             time_block.setStyleSheet("""
                 QFrame {
-                    background-color: #f7fafc;
-                    border-left: 4px solid #cbd5e0;
+                    background-color: #1a1a1a;
+                    border-left: 4px solid #333333;
                     border-radius: 8px;
                     padding: 10px;
                 }
@@ -284,7 +286,7 @@ class HistoryWindow(QDialog):
             time_label.setStyleSheet("""
                 font-size: 14px;
                 font-weight: bold;
-                color: #4a5568;
+                color: #ffffff;
                 min-width: 60px;
             """)
             block_layout.addWidget(time_label)
@@ -295,14 +297,14 @@ class HistoryWindow(QDialog):
 
             for act in acts:
                 category_colors = {
-                    'productive': '#a8e6cf',
-                    'distracting': '#ffb3ba',
-                    'neutral': '#e0e0e0'
+                    'productive': '#ffffff',
+                    'distracting': '#888888',
+                    'neutral': '#444444'
                 }
                 category_text_colors = {
-                    'productive': '#2d5f47',
-                    'distracting': '#8b2e2e',
-                    'neutral': '#4a5568'
+                    'productive': '#0a0a0a',
+                    'distracting': '#0a0a0a',
+                    'neutral': '#ffffff'
                 }
 
                 color = category_colors.get(act.category, '#e0e0e0')

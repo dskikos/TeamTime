@@ -35,13 +35,14 @@ class Dashboard(QMainWindow):
         self.setGeometry(50, 50, 950, 1050)
         self.setMinimumSize(750, 850)
 
-        # Set modern pastel background
+        # Set dark minimalist background
         self.setStyleSheet("""
             QMainWindow {
-                background-color: #f8f9fa;
+                background-color: #0a0a0a;
             }
             QWidget {
-                background-color: #f8f9fa;
+                background-color: #0a0a0a;
+                color: #ffffff;
             }
         """)
 
@@ -79,16 +80,17 @@ class Dashboard(QMainWindow):
                 padding: 14px 28px;
                 font-size: 16px;
                 font-weight: 600;
-                background-color: #a8e6cf;
-                color: #2d5f47;
-                border: none;
+                background-color: #ffffff;
+                color: #0a0a0a;
+                border: 2px solid #333333;
                 border-radius: 15px;
             }
             QPushButton:hover {
-                background-color: #91d9b8;
+                background-color: #f0f0f0;
+                border: 2px solid #555555;
             }
             QPushButton:pressed {
-                background-color: #7bc9a3;
+                background-color: #e0e0e0;
             }
         """)
 
@@ -99,16 +101,17 @@ class Dashboard(QMainWindow):
                 padding: 14px 28px;
                 font-size: 16px;
                 font-weight: 600;
-                background-color: #ffb3ba;
-                color: #8b2e2e;
-                border: none;
+                background-color: #1a1a1a;
+                color: #ffffff;
+                border: 2px solid #333333;
                 border-radius: 15px;
             }
             QPushButton:hover {
-                background-color: #ff9ba3;
+                background-color: #2a2a2a;
+                border: 2px solid #555555;
             }
             QPushButton:pressed {
-                background-color: #ff8389;
+                background-color: #333333;
             }
         """)
 
@@ -119,16 +122,17 @@ class Dashboard(QMainWindow):
                 padding: 14px 28px;
                 font-size: 16px;
                 font-weight: 600;
-                background-color: #bae1ff;
-                color: #2b5875;
-                border: none;
+                background-color: #1a1a1a;
+                color: #ffffff;
+                border: 2px solid #333333;
                 border-radius: 15px;
             }
             QPushButton:hover {
-                background-color: #a3d5ff;
+                background-color: #2a2a2a;
+                border: 2px solid #555555;
             }
             QPushButton:pressed {
-                background-color: #8cc9ff;
+                background-color: #333333;
             }
         """)
 
@@ -159,16 +163,17 @@ class Dashboard(QMainWindow):
                     padding: 14px 28px;
                     font-size: 16px;
                     font-weight: 600;
-                    background-color: #a8e6cf;
-                    color: #2d5f47;
-                    border: none;
+                    background-color: #ffffff;
+                    color: #0a0a0a;
+                    border: 2px solid #333333;
                     border-radius: 15px;
                 }
                 QPushButton:hover {
-                    background-color: #91d9b8;
+                    background-color: #f0f0f0;
+                    border: 2px solid #555555;
                 }
                 QPushButton:pressed {
-                    background-color: #7bc9a3;
+                    background-color: #e0e0e0;
                 }
             """)
         else:
@@ -179,16 +184,17 @@ class Dashboard(QMainWindow):
                     padding: 14px 28px;
                     font-size: 16px;
                     font-weight: 600;
-                    background-color: #ffb3ba;
-                    color: #8b2e2e;
-                    border: none;
+                    background-color: #0a0a0a;
+                    color: #ffffff;
+                    border: 2px solid #ffffff;
                     border-radius: 15px;
                 }
                 QPushButton:hover {
-                    background-color: #ff9ba3;
+                    background-color: #1a1a1a;
+                    border: 2px solid #f0f0f0;
                 }
                 QPushButton:pressed {
-                    background-color: #ff8389;
+                    background-color: #2a2a2a;
                 }
             """)
 
