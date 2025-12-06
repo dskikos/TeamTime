@@ -205,10 +205,14 @@ class HistoryWindow(QDialog):
         ax.bar(sorted_times, neutral, bar_width, bottom=bottom,
                label='Neutral', color='#e0e0e0', edgecolor='none')
 
-        # Format x-axis
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-        ax.xaxis.set_major_locator(mdates.MinuteLocator(interval=max(1, len(sorted_times) // 20)))
-        plt.xticks(rotation=45, ha='right')
+        # Format x-axis with smarter tick spacing
+        num_ticks = min(20, len(sorted_times))
+        if len(sorted_times) > 0:
+            interval = max(1, len(sorted_times) // num_ticks)
+            # Use AutoDateLocator for better tick placement
+            ax.xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=num_ticks))
+            ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+            plt.xticks(rotation=45, ha='right')
 
         # Style
         ax.set_ylabel('Minutes', fontsize=11, color='#4a5568', fontweight='bold')
