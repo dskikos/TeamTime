@@ -1,7 +1,6 @@
 {
   "productive": [
     "vscode",
-    "code",
     "pycharm",
     "intellij",
     "eclipse",
@@ -27,7 +26,9 @@
     "powerpoint",
     "libreoffice",
     "latex",
-    "overleaf"
+    "overleaf",
+    "code",
+    "firefox"
   ],
   "distracting": [
     "instagram",
@@ -76,5 +77,8 @@
     "safari",
     "edge",
     "brave"
+  ],
+  "manually_changed": [
+    "firefox"
   ]
 }

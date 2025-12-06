@@ -18,12 +18,17 @@ class Categorizer:
     def load_categories(self):
         if os.path.exists(self.config_path):
             with open(self.config_path, 'r') as f:
-                return json.load(f)
+                data = json.load(f)
+                # Ensure manually_changed exists
+                if "manually_changed" not in data:
+                    data["manually_changed"] = []
+                return data
         else:
             return {
                 "productive": [],
                 "distracting": [],
-                "neutral": []
+                "neutral": [],
+                "manually_changed": []
             }
 
     def categorize(self, app_name, window_title=""):
@@ -37,15 +42,39 @@ class Categorizer:
                 is_browser = True
                 break
 
-        # If it's a browser, check window title for productive sites
+        # If it's a browser, analyze the active tab (window title)
         if is_browser:
+            # Extract domain/site from window title
+            # Browser titles are usually: "Page Title - Site Name" or "Site: Page Title"
+
+            # Check for productive sites in the window title (active tab)
             productive_sites = ['stackoverflow', 'github', 'gitlab', 'docs',
                                 'documentation', 'tutorial', 'learn',
-                                'developer', 'api', 'programming', 'code']
+                                'developer', 'api', 'programming', 'code',
+                                'leetcode', 'geeksforgeeks', 'mdn', 'w3schools',
+                                'coursera', 'udemy', 'edx', 'khan academy']
             for site in productive_sites:
                 if site in title_lower:
                     return "productive"
-            # Otherwise browsers are distracting
+
+            # Check for distracting sites in the window title (active tab)
+            distracting_sites = ['instagram', 'facebook', 'twitter', 'tiktok',
+                                 'reddit', 'youtube', 'twitch', 'netflix',
+                                 'hulu', 'primevideo', 'disney', 'snapchat',
+                                 'whatsapp', 'messenger', 'telegram']
+            for site in distracting_sites:
+                if site in title_lower:
+                    return "distracting"
+
+            # Check for neutral sites
+            neutral_sites = ['gmail', 'outlook', 'mail', 'calendar', 'drive',
+                            'dropbox', 'onedrive', 'zoom', 'teams', 'slack',
+                            'discord', 'notion', 'trello', 'asana']
+            for site in neutral_sites:
+                if site in title_lower:
+                    return "neutral"
+
+            # If no specific site detected, default to distracting for browsers
             return "distracting"
 
         # Check productive apps/keywords
@@ -95,17 +124,36 @@ class Categorizer:
 
     def add_rule(self, category, keyword):
         if category in self.categories:
+            # Remove keyword from ALL other categories first
+            for cat in ['productive', 'distracting', 'neutral']:
+                if cat != category and keyword in self.categories.get(cat, []):
+                    self.categories[cat].remove(keyword)
+
+            # Add to the new category
             if keyword not in self.categories[category]:
                 self.categories[category].append(keyword)
-                self.save_categories()
+
+            # Track that this was manually changed
+            if "manually_changed" not in self.categories:
+                self.categories["manually_changed"] = []
+            if keyword not in self.categories["manually_changed"]:
+                self.categories["manually_changed"].append(keyword)
+
+            self.save_categories()
+            self.reload_categories()
 
     def remove_rule(self, category, keyword):
         if category in self.categories:
             if keyword in self.categories[category]:
                 self.categories[category].remove(keyword)
                 self.save_categories()
+                self.reload_categories()
 
     def save_categories(self):
         os.makedirs(os.path.dirname(self.config_path), exist_ok=True)
         with open(self.config_path, 'w') as f:
             json.dump(self.categories, f, indent=2)
+
+    def reload_categories(self):
+        self.categories = self.load_categories()
+        self.cache.clear()  # Clear cache to force recategorization
