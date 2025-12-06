@@ -1,0 +1,27 @@
+# Core dependencies
+pygetwindow==0.0.9
+psutil==5.9.8
+pywinctl==0.3
+
+# Database
+peewee==3.17.0
+
+# GUI
+PyQt5==5.15.10
+
+# Visualization
+matplotlib==3.8.2
+plotly==5.18.0
+
+# Configuration
+pyyaml==6.0.1
+python-dotenv==1.0.0
+
+# Notifications
+plyer==2.1.0
+
+# Scheduling
+schedule==1.2.0
+
+# Utilities
+tqdm==4.66.1
